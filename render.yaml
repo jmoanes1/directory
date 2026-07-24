@@ -1,0 +1,50 @@
+# Render Blueprint — Django Employee Directory
+#
+# Do NOT deploy this repo as a "Static Site".
+# Static Sites expect a publish folder like "build" and fail with:
+#   "Publish directory build does not exist!"
+#
+# Use: Dashboard → New → Blueprint  (or New → Web Service)
+
+services:
+  - type: web
+    name: employee-directory
+    runtime: python
+    plan: free
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      python manage.py collectstatic --no-input
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.11
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      # Leading-dot form allows any *.onrender.com hostname
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      # Set after first deploy, e.g. https://employee-directory.onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+      # Link your Render Postgres in the dashboard, or paste DATABASE_URL here
+      - key: DATABASE_URL
+        sync: false
+      - key: EMAIL_BACKEND
+        value: config.email_backends.ResilientEmailBackend
+      - key: EMAIL_HOST
+        value: smtp-relay.brevo.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
