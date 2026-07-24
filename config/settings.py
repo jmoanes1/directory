@@ -6,6 +6,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import dj_database_url
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -96,11 +97,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Database — SQLite by default for local development.
-# Set DB_ENGINE=postgresql in .env when you are ready to use PostgreSQL.
+# Database — prefer Render/Heroku DATABASE_URL; else env PostgreSQL; else SQLite.
+# Render injects DATABASE_URL automatically when a Postgres service is linked.
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").lower()
 
-if DB_ENGINE == "postgresql":
+if DATABASE_URL:
+    # ssl_require=True is needed for Render Postgres over the public network.
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+elif DB_ENGINE == "postgresql":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
