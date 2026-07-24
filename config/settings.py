@@ -232,7 +232,9 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # Security (production-hardened when DEBUG=False)
+# Render terminates TLS at the proxy; trust X-Forwarded-Proto so HTTPS redirects work.
 if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
