@@ -1,0 +1,458 @@
+/* ============================================
+   Profile Pages — Compact, polished layout
+   ============================================ */
+
+/* ----- Account: My Profile ----- */
+.account-profile-page {
+    max-width: 820px;
+    margin: 0 auto;
+}
+
+.account-profile-page .page-header {
+    margin-bottom: 1.25rem;
+}
+
+.account-profile-page .page-header h1 {
+    font-size: 1.5rem;
+}
+
+.account-profile-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.account-profile-banner {
+    height: 64px;
+    background: var(--color-primary);
+    position: relative;
+}
+.account-profile-banner::after {
+    display: none;
+}
+
+.account-profile-identity {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    padding: 0 1.5rem 1.25rem;
+    margin-top: -36px;
+    position: relative;
+    z-index: 1;
+}
+
+.account-profile-identity .avatar-profile {
+    border: 3px solid var(--bg-surface);
+    box-shadow: var(--shadow-md);
+}
+
+.account-profile-meta {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: 0.125rem;
+}
+
+.account-profile-meta h2 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.account-profile-meta p {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.account-profile-body {
+    padding: 0 1.5rem 1.5rem;
+}
+
+.account-profile-section {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-subtle);
+    margin-top: 0.25rem;
+}
+
+.account-profile-section:first-child {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.account-profile-section-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 0.875rem;
+}
+
+.account-profile-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.875rem 1rem;
+}
+
+.account-profile-fields .form-group-full {
+    grid-column: 1 / -1;
+}
+
+.account-profile-fields .form-group label {
+    font-size: 0.8125rem;
+    margin-bottom: 0.375rem;
+}
+
+.account-profile-fields .form-control {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+/* Avatar upload zone */
+.avatar-upload-zone {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-body);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--border-radius-lg);
+}
+
+.avatar-upload-preview .avatar-profile {
+    width: 80px;
+    height: 80px;
+    font-size: 1.5rem;
+    border: 3px solid var(--bg-surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.avatar-upload-controls strong {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.avatar-upload-controls p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+}
+
+.avatar-upload-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.avatar-choose-btn {
+    cursor: pointer;
+    margin: 0;
+}
+
+.avatar-file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.profile-photo-wrap {
+    flex-shrink: 0;
+}
+
+/* Remove old upload row styles */
+.avatar-upload-row {
+    display: none;
+}
+
+.account-profile-identity .avatar-profile-hero {
+    width: 88px;
+    height: 88px;
+    font-size: 1.5rem;
+    border: 3px solid var(--bg-surface);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+}
+
+.account-profile-identity .avatar-profile {
+    border-radius: 50%;
+}
+
+.account-profile-identity .avatar-profile img {
+    border-radius: 50%;
+}
+
+.account-profile-actions {
+    display: flex;
+    gap: 0.625rem;
+    flex-wrap: wrap;
+    padding-top: 1.25rem;
+    margin-top: 1.25rem;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.account-profile-actions .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+/* ----- Employee: Detail Profile ----- */
+.employee-profile-page {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.employee-profile-page .breadcrumb {
+    margin-bottom: 0.875rem;
+    font-size: 0.8125rem;
+}
+
+.profile-hero {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1rem 1.25rem;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1rem;
+}
+
+.profile-hero-main {
+    min-width: 0;
+}
+
+.profile-hero-main h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    margin-bottom: 0.25rem;
+}
+
+.profile-hero-subtitle {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin-bottom: 0.625rem;
+}
+
+.profile-hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-bottom: 0.625rem;
+}
+
+.profile-hero-badges .badge {
+    font-size: 0.6875rem;
+    padding: 0.2rem 0.5rem;
+}
+
+.profile-completion-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    max-width: 280px;
+}
+
+.profile-completion-inline span {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.profile-completion-inline .profile-completion-bar {
+    flex: 1;
+    height: 5px;
+    margin: 0;
+}
+
+.profile-completion-inline strong {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.profile-hero-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.profile-hero-actions .inline-form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.profile-hero-actions .btn {
+    padding: 0.4375rem 0.75rem;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+}
+
+.profile-hero-actions .btn-icon-danger {
+    padding: 0.4375rem 0.625rem;
+    line-height: 1;
+}
+
+.profile-quick-nav {
+    margin-bottom: 1rem;
+    gap: 0.375rem;
+}
+
+.profile-quick-nav a {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+}
+
+.employee-profile-page .detail-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.employee-profile-page .detail-grid .card-full {
+    grid-column: 1 / -1;
+}
+
+.employee-profile-page .card-header {
+    padding: 0.75rem 1rem;
+}
+
+.employee-profile-page .card-header h3 {
+    font-size: 0.875rem;
+}
+
+.employee-profile-page .card-icon {
+    font-size: 0.875rem;
+}
+
+.employee-profile-page .card-body {
+    padding: 0.875rem 1rem 1rem;
+}
+
+.employee-profile-page .detail-list {
+    grid-template-columns: 110px 1fr;
+    gap: 0.5rem 0.875rem;
+    font-size: 0.875rem;
+}
+
+.employee-profile-page .detail-list dt {
+    font-size: 0.75rem;
+}
+
+.employee-profile-page .detail-list dd {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.employee-profile-page .skill-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+}
+
+.employee-profile-page .activity-item {
+    padding: 0.625rem 0;
+    font-size: 0.8125rem;
+}
+
+.employee-profile-page .empty-state.compact-empty {
+    padding: 0.5rem 0;
+    text-align: left;
+}
+
+/* Hide file input label when rendered inside upload row */
+.account-profile-body .avatar-upload-row > label {
+    display: none;
+}
+
+/* Shared avatar size for profiles — always circular */
+.avatar-profile {
+    width: 72px;
+    height: 72px;
+    font-size: 1.25rem;
+    border-radius: 50%;
+    border: 2px solid var(--bg-surface);
+    box-shadow: var(--shadow-xs);
+}
+
+.avatar-profile img {
+    border-radius: 50%;
+}
+
+.profile-hero-photo .avatar-profile {
+    width: 76px;
+    height: 76px;
+}
+
+@media (max-width: 900px) {
+    .profile-hero {
+        grid-template-columns: auto 1fr;
+    }
+
+    .profile-hero-actions {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .employee-profile-page .detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .account-profile-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .account-profile-identity {
+        flex-wrap: wrap;
+        margin-top: -28px;
+    }
+
+    .avatar-upload-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profile-hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .profile-hero-photo {
+        display: flex;
+        justify-content: center;
+    }
+
+    .profile-hero-badges,
+    .profile-completion-inline {
+        justify-content: center;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .profile-hero-actions {
+        justify-content: center;
+    }
+}

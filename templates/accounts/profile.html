@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Profile - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="account-profile-page">
+    <div class="page-header">
+        <span class="page-header-badge">👤 Account</span>
+        <h1>My Profile</h1>
+        <p class="text-muted">Manage your account details and photo</p>
+    </div>
+
+    <div class="account-profile-card">
+        <div class="account-profile-banner"></div>
+
+        <div class="account-profile-identity">
+            <div class="profile-photo-wrap" id="profilePhotoPreview">
+                {% if user.avatar %}
+                {% include "includes/avatar.html" with css_class="avatar-profile avatar-profile-hero" photo_url=user.avatar.url initials=user.initials alt=user.get_full_name %}
+                {% else %}
+                {% include "includes/avatar.html" with css_class="avatar-profile avatar-profile-hero" initials=user.initials %}
+                {% endif %}
+            </div>
+            <div class="account-profile-meta">
+                <h2>{{ user.get_full_name|default:user.username }}</h2>
+                <p>{{ user.get_role_display }} · @{{ user.username }}</p>
+            </div>
+        </div>
+
+        <div class="account-profile-body">
+            <form method="post" enctype="multipart/form-data" id="profileForm" data-initials="{{ user.initials }}" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="avatar_clear" id="avatarClear" value="0">
+
+                <div class="account-profile-section">
+                    <p class="account-profile-section-title">Profile Photo</p>
+                    <div class="avatar-upload-zone">
+                        <div class="avatar-upload-preview">
+                            {% if user.avatar %}
+                            {% include "includes/avatar.html" with css_class="avatar-profile" photo_url=user.avatar.url initials=user.initials id="avatarUploadPreview" %}
+                            {% else %}
+                            {% include "includes/avatar.html" with css_class="avatar-profile" initials=user.initials id="avatarUploadPreview" %}
+                            {% endif %}
+                        </div>
+                        <div class="avatar-upload-controls">
+                            <strong>Profile picture</strong>
+                            <p>JPG, PNG or WebP · Max 5 MB</p>
+                            <div class="avatar-upload-buttons">
+                                <label for="{{ form.avatar.id_for_label }}" class="btn btn-outline btn-sm avatar-choose-btn">Choose Photo</label>
+                                <button type="button" class="btn btn-outline btn-sm avatar-remove-btn" id="avatarRemoveBtn" {% if not user.avatar %}hidden{% endif %}>Remove</button>
+                            </div>
+                            <input type="file" name="avatar" id="{{ form.avatar.id_for_label }}" accept="image/*" class="avatar-file-input" data-has-photo="{% if user.avatar %}1{% else %}0{% endif %}">
+                        </div>
+                    </div>
+                    {% if form.avatar.errors %}<span class="form-error">{{ form.avatar.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="account-profile-section">
+                    <p class="account-profile-section-title">Personal Details</p>
+                    <div class="account-profile-fields">
+                        <div class="form-group">
+                            <label for="{{ form.first_name.id_for_label }}">First Name</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}<span class="form-error">{{ form.first_name.errors.0 }}</span>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}<span class="form-error">{{ form.last_name.errors.0 }}</span>{% endif %}
+                        </div>
+                        <div class="form-group form-group-full">
+                            <label for="{{ form.email.id_for_label }}">Email</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<span class="form-error">{{ form.email.errors.0 }}</span>{% endif %}
+                        </div>
+                        <div class="form-group form-group-full">
+                            <label for="{{ form.phone.id_for_label }}">Phone</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}<span class="form-error">{{ form.phone.errors.0 }}</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-profile-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{% url 'accounts:change_password' %}" class="btn btn-outline">Change Password</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/profile.js' %}"></script>
+{% endblock %}

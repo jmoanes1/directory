@@ -1,0 +1,12 @@
+{# Usage: {% include "includes/empty_state.html" with icon="◎" title="No employees" message="Try adjusting filters." action_url=url action_label="Add employee" %} #}
+<div class="empty-state{% if compact %} compact-empty{% endif %}">
+    <div class="empty-state-icon">{{ icon|default:"📋" }}</div>
+    <h3>{{ title }}</h3>
+    {% if message %}<p>{{ message }}</p>{% endif %}
+    {% if action_url or secondary_url %}
+    <div class="empty-state-actions">
+        {% if action_url %}<a href="{{ action_url }}" class="btn btn-primary">{{ action_label|default:"Get started" }}</a>{% endif %}
+        {% if secondary_url %}<a href="{{ secondary_url }}" class="btn btn-outline">{{ secondary_label }}</a>{% endif %}
+    </div>
+    {% endif %}
+</div>

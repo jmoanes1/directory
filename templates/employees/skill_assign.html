@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Assign Skill - Employee Directory{% endblock %}
+
+{% block content %}
+<div class="page-header"><h1>Assign Skill to Employee</h1></div>
+<div class="card"><div class="card-body">
+    <form method="post" class="form-grid" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="form-actions form-group-full">
+            <button type="submit" class="btn btn-primary">Assign</button>
+            <a href="{% url 'employees:skills_matrix' %}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div></div>
+{% endblock %}

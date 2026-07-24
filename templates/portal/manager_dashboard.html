@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manager Dashboard - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/portal.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="mgr-page page-shell">
+
+    <header class="mgr-page-header">
+        <div class="mgr-page-header-main">
+            <h1>Manager dashboard</h1>
+            <p class="mgr-page-subtitle">
+                {% if is_hr_view %}Organization overview{% else %}Your team at a glance{% endif %}
+            </p>
+        </div>
+        <div class="mgr-page-header-actions">
+            <a href="{% url 'employees:team_hierarchy' %}" class="btn btn-outline btn-sm">Team hierarchy</a>
+            <a href="{% url 'attendance:leave_list' %}" class="btn btn-outline btn-sm">Review leave</a>
+            {% if user.can_manage_employees %}
+            <a href="{% url 'attendance:report' %}" class="btn btn-outline btn-sm">Attendance reports</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <section class="mgr-stats" aria-label="Team summary">
+        <article class="mgr-stat">
+            <span class="mgr-stat-value">{{ team_size }}</span>
+            <span class="mgr-stat-label">{% if is_hr_view %}Active employees{% else %}Team members{% endif %}</span>
+        </article>
+        <article class="mgr-stat">
+            <span class="mgr-stat-value">{{ present_today }}</span>
+            <span class="mgr-stat-label">Present today</span>
+        </article>
+        <article class="mgr-stat">
+            <span class="mgr-stat-value">{{ on_leave|length }}</span>
+            <span class="mgr-stat-label">On leave</span>
+        </article>
+        <article class="mgr-stat">
+            <span class="mgr-stat-value">{{ pending_leaves|length }}</span>
+            <span class="mgr-stat-label">Pending approvals</span>
+        </article>
+    </section>
+
+    <nav class="mgr-nav" aria-label="Manager shortcuts">
+        <a href="{% url 'employees:list' %}" class="mgr-nav-link">Employee directory</a>
+        <a href="{% url 'employees:team_hierarchy' %}" class="mgr-nav-link">Team hierarchy</a>
+        <a href="{% url 'attendance:leave_list' %}" class="mgr-nav-link">Leave requests</a>
+        <a href="{% url 'attendance:dashboard' %}" class="mgr-nav-link">Attendance</a>
+        {% if user.can_manage_employees %}
+        <a href="{% url 'attendance:report' %}" class="mgr-nav-link">Reports</a>
+        {% endif %}
+    </nav>
+
+    <div class="mgr-panels">
+        <section class="mgr-section">
+            <div class="mgr-section-header">
+                <h2>{% if is_hr_view %}Active employees{% else %}Direct reports{% endif %}</h2>
+                <span class="mgr-section-meta">{{ direct_reports|length }} shown</span>
+            </div>
+            <div class="mgr-section-body">
+                {% if direct_reports %}
+                <div class="mgr-team-list">
+                    {% for emp in direct_reports %}
+                    <a href="{% url 'employees:detail' emp.pk %}" class="mgr-team-row">
+                        {% if emp.profile_photo %}
+                        {% include "includes/avatar.html" with css_class="avatar-sm" photo_url=emp.profile_photo.url initials=emp.initials %}
+                        {% else %}
+                        {% include "includes/avatar.html" with css_class="avatar-sm" initials=emp.initials %}
+                        {% endif %}
+                        <div class="mgr-team-info">
+                            <strong>{{ emp.full_name }}</strong>
+                            <span>
+                                {% if emp.position %}{{ emp.position.title }}{% endif %}
+                                {% if emp.department %} · {{ emp.department.name }}{% endif %}
+                            </span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="mgr-muted">No direct reports assigned.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="mgr-section">
+            <div class="mgr-section-header">
+                <h2>Pending leave requests</h2>
+                <a href="{% url 'attendance:leave_list' %}" class="btn btn-sm btn-outline">View all</a>
+            </div>
+            <div class="mgr-section-body">
+                {% if pending_leaves %}
+                <ul class="mgr-list">
+                    {% for leave in pending_leaves %}
+                    <li>
+                        <div class="mgr-list-main">
+                            <span>{{ leave.employee.full_name }}</span>
+                            <span class="mgr-list-sub">{{ leave.leave_type.name }}</span>
+                        </div>
+                        <span class="mgr-list-meta">{{ leave.start_date|date:"M d" }} – {{ leave.end_date|date:"M d" }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="mgr-muted">No pending requests.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    {% if on_leave %}
+    <section class="mgr-section">
+        <div class="mgr-section-header">
+            <h2>On leave today</h2>
+            <span class="mgr-section-meta">{{ on_leave|length }} employee{{ on_leave|length|pluralize }}</span>
+        </div>
+        <div class="mgr-section-body">
+            <ul class="mgr-list mgr-list-compact">
+                {% for emp in on_leave %}
+                <li>
+                    <a href="{% url 'employees:detail' emp.pk %}" class="mgr-list-link">{{ emp.full_name }}</a>
+                    {% if emp.department %}
+                    <span class="mgr-list-meta">{{ emp.department.name }}</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if is_hr_view and dept_breakdown %}
+    <section class="mgr-section">
+        <div class="mgr-section-header">
+            <h2>Headcount by department</h2>
+        </div>
+        <div class="mgr-section-body">
+            <ul class="mgr-dept-list">
+                {% for row in dept_breakdown %}
+                <li>
+                    <span>{{ row.department__name|default:"Unassigned" }}</span>
+                    <span class="mgr-list-meta">{{ row.count }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
+    {% endif %}
+
+</div>
+{% endblock %}

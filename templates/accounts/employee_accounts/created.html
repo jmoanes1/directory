@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Account Created - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/employee-accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ea-page page-shell ea-credentials-wrap">
+
+    <section class="ea-credentials-card">
+        <div class="ea-credentials-header">
+            <h1>{% if creds.reset %}Password reset{% else %}Account created{% endif %}</h1>
+            <p>{{ creds.full_name }}</p>
+        </div>
+        <div class="ea-credentials-body">
+            <p class="ea-credentials-note">
+                Share these credentials securely. The employee must change their password on first login.
+            </p>
+
+            <div id="credentialsBlock" class="visually-hidden-for-copy" aria-hidden="true">
+Employee ID: {{ creds.employee_id }}
+Username: {{ creds.username }}
+Temporary Password: {{ creds.password }}
+Email: {{ creds.email }}
+            </div>
+
+            <div class="ea-credential-row">
+                <div>
+                    <span class="ea-credential-label">Employee ID</span>
+                    <code>{{ creds.employee_id }}</code>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline" data-copy-value="{{ creds.employee_id }}">Copy</button>
+            </div>
+            <div class="ea-credential-row">
+                <div>
+                    <span class="ea-credential-label">Username</span>
+                    <code>{{ creds.username }}</code>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline" data-copy-value="{{ creds.username }}">Copy</button>
+            </div>
+            <div class="ea-credential-row">
+                <div>
+                    <span class="ea-credential-label">Temporary password</span>
+                    <code>{{ creds.password }}</code>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline" data-copy-value="{{ creds.password }}">Copy</button>
+            </div>
+
+            <div class="ea-credentials-actions">
+                <button type="button" class="btn btn-primary btn-sm" id="copyAllCredentials">Copy all</button>
+                <form action="{% url 'accounts:employee_account_send_credentials' employee.pk %}" method="post" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline btn-sm">Email to {{ creds.email }}</button>
+                </form>
+                <a href="{% url 'accounts:employee_account_detail' employee.pk %}" class="btn btn-outline btn-sm">View account</a>
+                <a href="{% url 'accounts:employee_account_list' %}" class="btn btn-outline btn-sm">Back to list</a>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/employee-accounts.js' %}"></script>
+{% endblock %}

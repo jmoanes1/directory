@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/positions.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="positions-page page-shell positions-form-page">
+
+    <nav class="pos-breadcrumb">
+        <a href="{% url 'positions:list' %}">Positions</a>
+        <span>/</span>
+        <span>{{ title }}</span>
+    </nav>
+
+    <header class="pos-page-header">
+        <div class="pos-page-header-main">
+            <h1>{{ title }}</h1>
+            <p class="pos-page-subtitle">Define the role title and department assignment</p>
+        </div>
+    </header>
+
+    <div class="card pos-form-card">
+        <div class="card-body">
+            <form method="post" class="form-grid pos-form" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group {% if field.name == 'description' %}form-group-full{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                </div>
+                {% endfor %}
+                <div class="form-actions form-group-full">
+                    <button type="submit" class="btn btn-primary">Save position</button>
+                    <a href="{% url 'positions:list' %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

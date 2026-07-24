@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Hiring Pipeline - Recruitment{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/recruitment.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="rec-page page-shell">
+
+    <header class="rec-page-header">
+        <div class="rec-page-header-main">
+            <h1>Hiring pipeline</h1>
+            <p class="rec-page-subtitle">Track candidates through each stage</p>
+        </div>
+        <div class="rec-page-header-actions">
+            <a href="{% url 'recruitment:job_list' %}" class="btn btn-outline btn-sm">Job openings</a>
+        </div>
+    </header>
+
+    <section class="rec-stats" aria-label="Pipeline summary">
+        <article class="rec-stat">
+            <span class="rec-stat-value">{{ stats.total }}</span>
+            <span class="rec-stat-label">Total applications</span>
+        </article>
+        <article class="rec-stat">
+            <span class="rec-stat-value">{{ stats.open_jobs }}</span>
+            <span class="rec-stat-label">Open jobs</span>
+        </article>
+        <article class="rec-stat">
+            <span class="rec-stat-value">{{ stats.interviews }}</span>
+            <span class="rec-stat-label">Scheduled interviews</span>
+        </article>
+        <article class="rec-stat">
+            <span class="rec-stat-value">{% for col in status_columns %}{% if col.key == 'hired' %}{{ col.apps|length }}{% endif %}{% endfor %}</span>
+            <span class="rec-stat-label">Hired</span>
+        </article>
+    </section>
+
+    <div class="rec-pipeline-board">
+        {% for col in status_columns %}
+        <div class="rec-pipeline-column">
+            <div class="rec-pipeline-column-header">
+                <span>{{ col.label }}</span>
+                <span>{{ col.apps|length }}</span>
+            </div>
+            {% for app in col.apps %}
+            <a href="{% url 'recruitment:application_detail' app.pk %}" class="rec-pipeline-card">
+                <strong>{{ app.candidate.full_name }}</strong>
+                <small>{{ app.job.title }}</small>
+            </a>
+            {% empty %}
+            <p class="rec-pipeline-empty">—</p>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

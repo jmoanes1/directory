@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Directory Chat - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-page page-shell">
+
+    <header class="chat-page-header">
+        <div class="chat-page-header-main">
+            <h1>Directory chat</h1>
+            <p class="chat-page-subtitle">Ask the assistant about employees, departments, and workforce data</p>
+        </div>
+    </header>
+
+    <div class="chat-panel">
+        <div class="chat-panel-top">
+            <div class="chat-panel-title">
+                <h2>Directory assistant</h2>
+                <p>Natural language search across your employee directory</p>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages" data-room-id="{{ assistant_room.pk }}">
+            {% if not messages_list %}
+            <div class="chat-welcome" id="chatWelcome">
+                <h3>How can I help?</h3>
+                <p>Try a question about teams, roles, headcount, or who reports to whom.</p>
+                <div class="chat-suggestions">
+                    <button type="button" class="chat-suggestion" data-query="active employees">Active employees</button>
+                    <button type="button" class="chat-suggestion" data-query="employees in engineering">Engineering team</button>
+                    <button type="button" class="chat-suggestion" data-query="how many employees">Headcount</button>
+                </div>
+            </div>
+            {% endif %}
+            {% for msg in messages_list %}
+            <div class="chat-message chat-message-{{ msg.message_type }}">
+                <div class="chat-bubble">
+                    <span class="chat-sender">{% if msg.message_type == 'assistant' %}Assistant{% else %}{{ msg.sender.get_full_name|default:"You" }}{% endif %}</span>
+                    <div class="chat-text">{{ msg.content|linebreaksbr }}</div>
+                    {% if msg.metadata.employees %}
+                    <div class="chat-employee-cards">
+                        {% for emp in msg.metadata.employees %}
+                        <a href="{% url 'employees:detail' emp.id %}" class="chat-emp-card">
+                            <strong>{{ emp.name }}</strong>
+                            <span>{{ emp.position }} · {{ emp.department }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <form id="chatForm" class="chat-compose">
+            {% csrf_token %}
+            <input type="hidden" name="room_id" value="{{ assistant_room.pk }}">
+            <input type="text" id="chatInput" name="content" class="chat-input form-control" placeholder="Ask about your workforce…" autocomplete="off" aria-label="Chat message">
+            <button type="submit" class="btn btn-primary btn-sm chat-send">Send</button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/chat.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Create Login Account - {{ employee.full_name }}{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="{% url 'employees:list' %}">Employees</a>
+    <span class="breadcrumb-sep">/</span>
+    <a href="{% url 'employees:detail' employee.pk %}">{{ employee.full_name }}</a>
+    <span class="breadcrumb-sep">/</span>
+    <span>Create Account</span>
+</nav>
+
+<div class="page-header">
+    <span class="page-header-badge">🔐 Login</span>
+    <h1>Create Employee Account</h1>
+    <p class="text-muted">Set up portal access for an existing employee record</p>
+</div>
+
+<div class="card form-page">
+    <div class="card-body">
+        <div class="page-intro-card" style="margin-bottom:1.25rem">
+            <strong>{{ employee.full_name }}</strong>
+            <span class="text-muted text-sm" style="display:block;margin-top:0.25rem">
+                {{ employee.employee_id }} · {{ employee.email }}
+            </span>
+        </div>
+
+        <form method="post" class="form-grid" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="form-group form-group-full">
+                {% for error in form.non_field_errors %}
+                <span class="form-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                {{ field }}
+                {% if field.help_text %}<span class="text-muted text-sm" style="display:block;margin-top:0.25rem">{{ field.help_text }}</span>{% endif %}
+                {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+            </div>
+            {% endfor %}
+            <div class="form-actions form-group-full">
+                <button type="submit" class="btn btn-primary">Create Account</button>
+                <a href="{% url 'employees:detail' employee.pk %}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

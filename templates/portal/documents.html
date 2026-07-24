@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Documents - Self-Service{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/portal.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ss-page page-shell ss-page-narrow">
+
+    <nav class="ss-breadcrumb">
+        <a href="{% url 'portal:home' %}">Self-service</a>
+        <span>/</span>
+        <span>Documents</span>
+    </nav>
+
+    <header class="ss-page-header">
+        <div class="ss-page-header-main">
+            <h1>Documents</h1>
+            <p class="ss-page-subtitle">Resume, certificates, contracts, and training records</p>
+        </div>
+    </header>
+
+    <section class="ss-section">
+        <div class="ss-section-header">
+            <h2>Upload document</h2>
+        </div>
+        <div class="ss-section-body">
+            <form method="post" enctype="multipart/form-data" class="form-grid ss-form">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group {% if field.name == 'file' %}form-group-full{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                </div>
+                {% endfor %}
+                <div class="form-group-full">
+                    <button type="submit" class="btn btn-primary btn-sm">Upload</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="ss-section">
+        <div class="ss-section-header">
+            <h2>Your files</h2>
+            <span class="ss-section-meta">{{ documents|length }} file{{ documents|length|pluralize }}</span>
+        </div>
+        <div class="ss-section-body">
+            {% if documents %}
+            <div class="ss-doc-list">
+                {% for doc in documents %}
+                <div class="ss-doc-item">
+                    <div class="ss-doc-info">
+                        <strong>{{ doc.title }}</strong>
+                        <span>{{ doc.get_document_type_display }} · {{ doc.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="ss-doc-actions">
+                        <a href="{% url 'portal:document_download' doc.pk %}" class="btn btn-sm btn-outline">Download</a>
+                        <form action="{% url 'portal:document_delete' doc.pk %}" method="post" class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline ss-delete-btn">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="ss-empty-inline">
+                <p>No documents yet. Upload your resume, certificates, or training records above.</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+</div>
+{% endblock %}

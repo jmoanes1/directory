@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/employee-accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ea-page page-shell ea-form-page">
+
+    <nav class="ea-breadcrumb">
+        <a href="{% url 'accounts:employee_account_list' %}">Employee accounts</a>
+        <span>/</span>
+        <span>{{ title }}</span>
+    </nav>
+
+    <header class="ea-page-header">
+        <div class="ea-page-header-main">
+            <h1>{{ title }}</h1>
+            <p class="ea-page-subtitle">{% if is_create %}Create employee profile and login credentials{% else %}Update employee and account information{% endif %}</p>
+        </div>
+    </header>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-error" style="margin-bottom:1rem">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <section class="ea-form-section">
+            <div class="ea-form-section-header">
+                <h2>Personal information</h2>
+                <p>Basic identity and contact details</p>
+            </div>
+            <div class="ea-form-section-body">
+                <div class="form-grid">
+                    {% for field in form %}
+                    {% if field.name in "first_name,middle_name,last_name,suffix,gender,date_of_birth,phone_number,email,address,profile_photo" %}
+                    <div class="form-group {% if field.name in 'address,profile_photo' %}form-group-full{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                        {{ field }}
+                        {% if field.help_text %}<span class="text-muted text-sm">{{ field.help_text }}</span>{% endif %}
+                        {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <section class="ea-form-section">
+            <div class="ea-form-section-header">
+                <h2>Employment information</h2>
+                <p>Department, position, and hire details</p>
+            </div>
+            <div class="ea-form-section-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.department.id_for_label }}">{{ form.department.label }} *</label>
+                        {{ form.department }}
+                        {% if form.department.errors %}<span class="form-error">{{ form.department.errors.0 }}</span>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.position.id_for_label }}">{{ form.position.label }} *</label>
+                        {{ form.position }}
+                        {% if form.position.errors %}<span class="form-error">{{ form.position.errors.0 }}</span>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.employment_status.id_for_label }}">{{ form.employment_status.label }} *</label>
+                        {{ form.employment_status }}
+                        {% if form.employment_status.errors %}<span class="form-error">{{ form.employment_status.errors.0 }}</span>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.employee_type.id_for_label }}">{{ form.employee_type.label }} *</label>
+                        {{ form.employee_type }}
+                        {% if form.employee_type.errors %}<span class="form-error">{{ form.employee_type.errors.0 }}</span>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.date_hired.id_for_label }}">{{ form.date_hired.label }} *</label>
+                        {{ form.date_hired }}
+                        {% if form.date_hired.errors %}<span class="form-error">{{ form.date_hired.errors.0 }}</span>{% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="ea-form-section">
+            <div class="ea-form-section-header">
+                <h2>Account information</h2>
+                <p>Login credentials and access role</p>
+            </div>
+            <div class="ea-form-section-body">
+                <div class="form-grid">
+                    {% for field in form %}
+                    {% if field.name in "username,account_role,account_active,generate_password,temporary_password,new_password" %}
+                    <div class="form-group {% if field.name == 'generate_password' %}form-group-full{% endif %}">
+                        {% if field.field.widget.input_type == 'checkbox' %}
+                        <label class="form-check-row" style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+                            {{ field }}
+                            <span>{{ field.label }}</span>
+                        </label>
+                        {% else %}
+                        <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                        {{ field }}
+                        {% endif %}
+                        {% if field.help_text %}<span class="text-muted text-sm" style="display:block;margin-top:0.25rem">{{ field.help_text }}</span>{% endif %}
+                        {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <div class="ea-form-actions">
+            <button type="submit" class="btn btn-primary">{% if is_create %}Create account{% else %}Save changes{% endif %}</button>
+            <a href="{% if employee %}{% url 'accounts:employee_account_detail' employee.pk %}{% else %}{% url 'accounts:employee_account_list' %}{% endif %}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/employee-accounts.js' %}"></script>
+{% endblock %}

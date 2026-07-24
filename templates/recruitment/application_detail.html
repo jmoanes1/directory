@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ application.candidate.full_name }} — Application{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/recruitment.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="rec-page page-shell">
+
+    <nav class="rec-breadcrumb">
+        <a href="{% url 'recruitment:pipeline' %}">Hiring pipeline</a>
+        <span>/</span>
+        <span>{{ application.candidate.full_name }}</span>
+    </nav>
+
+    <header class="rec-page-header">
+        <div class="rec-page-header-main">
+            <h1>{{ application.candidate.full_name }}</h1>
+            <p class="rec-page-subtitle">Applied for <a href="{% url 'recruitment:job_detail' application.job.pk %}">{{ application.job.title }}</a></p>
+        </div>
+        <span class="badge badge-outline">{{ application.get_status_display }}</span>
+    </header>
+
+    <div class="rec-panels">
+        <section class="rec-section">
+            <div class="rec-section-header"><h2>Candidate</h2></div>
+            <div class="rec-section-body">
+                <dl class="rec-detail-list">
+                    <div><dt>Email</dt><dd><a href="mailto:{{ application.candidate.email }}">{{ application.candidate.email }}</a></dd></div>
+                    {% if application.candidate.phone %}<div><dt>Phone</dt><dd>{{ application.candidate.phone }}</dd></div>{% endif %}
+                    {% if application.candidate.linkedin_url %}<div><dt>LinkedIn</dt><dd><a href="{{ application.candidate.linkedin_url }}" target="_blank" rel="noopener">Profile</a></dd></div>{% endif %}
+                    <div><dt>Applied</dt><dd>{{ application.applied_at|date:"M d, Y H:i" }}</dd></div>
+                    {% if application.candidate.resume %}
+                    <div><dt>Resume</dt><dd><a href="{% url 'recruitment:resume_download' application.candidate.pk %}" class="btn btn-sm btn-outline">Download</a></dd></div>
+                    {% endif %}
+                </dl>
+            </div>
+        </section>
+
+        <section class="rec-section">
+            <div class="rec-section-header"><h2>Update status</h2></div>
+            <div class="rec-section-body">
+                <form method="post" class="form-grid">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="status">
+                    {% for field in status_form %}
+                    <div class="form-group {% if field.name == 'hr_notes' %}form-group-full{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                    {% endfor %}
+                    <div class="form-actions form-group-full">
+                        <button type="submit" class="btn btn-primary btn-sm">Save status</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        {% if application.cover_letter %}
+        <section class="rec-section rec-section--full">
+            <div class="rec-section-header"><h2>Cover letter</h2></div>
+            <div class="rec-section-body">{{ application.cover_letter|linebreaksbr }}</div>
+        </section>
+        {% endif %}
+
+        <section class="rec-section">
+            <div class="rec-section-header"><h2>Schedule interview</h2></div>
+            <div class="rec-section-body">
+                <form method="post" class="form-grid">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="interview">
+                    {% for field in interview_form %}
+                    <div class="form-group {% if field.name in 'location_or_link,notes' %}form-group-full{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                    {% endfor %}
+                    <div class="form-actions form-group-full">
+                        <button type="submit" class="btn btn-primary btn-sm">Schedule</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="rec-section">
+            <div class="rec-section-header"><h2>Interviews</h2></div>
+            <div class="rec-section-body">
+                {% if interviews %}
+                <ul class="activity-list">
+                    {% for iv in interviews %}
+                    <li>
+                        <strong>{{ iv.get_interview_type_display }}</strong> — {{ iv.scheduled_at|date:"M d, Y H:i" }}
+                        <br><small class="text-muted">{{ iv.get_status_display }}{% if iv.interviewer %} · {{ iv.interviewer.get_full_name|default:iv.interviewer.username }}{% endif %}</small>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-sm">No interviews scheduled yet.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if application.status == 'hired' or tasks %}
+        <section class="rec-section rec-section--full">
+            <div class="rec-section-header"><h2>Onboarding checklist</h2></div>
+            <div class="rec-section-body">
+                {% if tasks %}
+                <ul class="onboarding-checklist">
+                    {% for task in tasks %}
+                    <li class="{% if task.is_completed %}done{% endif %}">
+                        <form method="post" action="{% url 'recruitment:onboarding_toggle' task.pk %}">
+                            {% csrf_token %}
+                            <input type="checkbox" {% if task.is_completed %}checked{% endif %} onchange="this.form.submit()">
+                        </form>
+                        <div>
+                            <strong>{{ task.title }}</strong>
+                            {% if task.description %}<br><small class="text-muted">{{ task.description }}</small>{% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-sm">Mark as hired to auto-generate onboarding tasks.</p>
+                {% endif %}
+
+                <form method="post" class="form-grid" style="margin-top:1rem;border-top:1px solid var(--border-subtle);padding-top:1rem">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="task">
+                    <div class="form-group form-group-full">
+                        <label for="{{ task_form.title.id_for_label }}">Add task</label>
+                        {{ task_form.title }}
+                    </div>
+                    <div class="form-actions form-group-full">
+                        <button type="submit" class="btn btn-outline btn-sm">Add task</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

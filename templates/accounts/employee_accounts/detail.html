@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ employee.full_name }} - Employee Account{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/employee-accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ea-page page-shell">
+
+    <nav class="ea-breadcrumb">
+        <a href="{% url 'accounts:employee_account_list' %}">Employee accounts</a>
+        <span>/</span>
+        <span>{{ employee.full_name }}</span>
+    </nav>
+
+    <header class="ea-page-header ea-page-header--profile">
+        <div class="ea-profile-header">
+            {% if employee.profile_photo %}
+            {% include "includes/avatar.html" with css_class="avatar-profile" photo_url=employee.profile_photo.url initials=employee.initials %}
+            {% else %}
+            {% include "includes/avatar.html" with css_class="avatar-profile" initials=employee.initials %}
+            {% endif %}
+            <div>
+                <h1>{{ employee.full_name }}</h1>
+                <p class="ea-page-subtitle">{{ employee.employee_id }} · @{{ employee.user.username }}</p>
+            </div>
+        </div>
+        <div class="ea-page-header-actions">
+            <a href="{% url 'accounts:employee_account_edit' employee.pk %}" class="btn btn-primary btn-sm">Edit</a>
+            <a href="{% url 'employees:detail' employee.pk %}" class="btn btn-outline btn-sm">Directory profile</a>
+        </div>
+    </header>
+
+    <div class="ea-detail-grid">
+        <section class="ea-section">
+            <div class="ea-section-header"><h2>Personal</h2></div>
+            <div class="ea-section-body">
+                <dl class="ea-detail-list">
+                    <div><dt>Email</dt><dd>{{ employee.email }}</dd></div>
+                    <div><dt>Phone</dt><dd>{{ employee.phone_number|default:"—" }}</dd></div>
+                    <div><dt>Gender</dt><dd>{{ employee.get_gender_display|default:"—" }}</dd></div>
+                    <div><dt>Date of birth</dt><dd>{{ employee.date_of_birth|date:"M d, Y"|default:"—" }}</dd></div>
+                    <div><dt>Address</dt><dd>{{ employee.address|default:"—"|linebreaksbr }}</dd></div>
+                </dl>
+            </div>
+        </section>
+        <section class="ea-section">
+            <div class="ea-section-header"><h2>Employment</h2></div>
+            <div class="ea-section-body">
+                <dl class="ea-detail-list">
+                    <div><dt>Department</dt><dd>{{ employee.department.name }}</dd></div>
+                    <div><dt>Position</dt><dd>{{ employee.position.title }}</dd></div>
+                    <div><dt>Employee type</dt><dd>{{ employee.get_employee_type_display }}</dd></div>
+                    <div><dt>Status</dt><dd>{{ employee.get_employment_status_display }}</dd></div>
+                    <div><dt>Date hired</dt><dd>{{ employee.date_hired|date:"M d, Y" }}</dd></div>
+                </dl>
+            </div>
+        </section>
+        <section class="ea-section">
+            <div class="ea-section-header"><h2>Account</h2></div>
+            <div class="ea-section-body">
+                <dl class="ea-detail-list">
+                    <div><dt>Username</dt><dd>@{{ employee.user.username }}</dd></div>
+                    <div><dt>Role</dt><dd>{{ employee.user.get_role_display }}</dd></div>
+                    <div><dt>Account status</dt>
+                        <dd>
+                            {% if employee.user.is_active %}
+                            <span class="badge badge-active">Active</span>
+                            {% else %}
+                            <span class="badge badge-inactive">Inactive</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div><dt>Password change required</dt><dd>{% if employee.user.must_change_password %}Yes{% else %}No{% endif %}</dd></div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <section class="ea-section">
+        <div class="ea-section-header"><h2>Account actions</h2></div>
+        <div class="ea-section-body">
+            <div class="ea-actions-inline">
+                <form action="{% url 'accounts:employee_account_reset_password' employee.pk %}" method="post" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline btn-sm ea-btn-with-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                        Reset password
+                    </button>
+                </form>
+                {% if employee.user_id != user.id %}
+                {% if not employee.user.is_super_admin or user.is_super_admin %}
+                <button type="button" class="btn btn-outline btn-sm" data-modal="toggle-active"
+                    data-url="{% url 'accounts:employee_account_toggle_active' employee.pk %}"
+                    data-name="{{ employee.full_name }}"
+                    data-action="{% if employee.user.is_active %}deactivate{% else %}activate{% endif %}"
+                    data-next="{% url 'accounts:employee_account_detail' employee.pk %}">
+                    {% if employee.user.is_active %}Deactivate{% else %}Activate{% endif %}
+                </button>
+                <button type="button" class="btn btn-sm btn-outline btn-icon-danger" data-modal="delete"
+                    data-url="{% url 'accounts:employee_account_delete' employee.pk %}"
+                    data-name="{{ employee.full_name }}"
+                    title="Delete account" aria-label="Delete {{ employee.full_name }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6"/></svg>
+                </button>
+                {% else %}
+                <span class="text-muted text-sm">Administrator accounts can only be changed by a Super Admin.</span>
+                {% endif %}
+                {% else %}
+                <span class="text-muted text-sm">You cannot deactivate or delete your own account here.</span>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

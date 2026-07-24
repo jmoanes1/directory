@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Access Denied - Employee Directory{% endblock %}
+
+{% block content %}
+<div class="access-denied-page">
+    <div class="access-denied-card">
+        <div class="access-denied-icon" aria-hidden="true">🛡</div>
+        <h1>Access Denied</h1>
+        <p class="text-muted">
+            {% if message %}{{ message }}{% else %}You do not have permission to view this page.{% endif %}
+        </p>
+        <p class="text-muted text-sm">Only administrators can manage employee accounts. Contact your system administrator if you need access.</p>
+        <div class="access-denied-actions">
+            <a href="{% url 'dashboard:home' %}" class="btn btn-primary">Go to Dashboard</a>
+            <a href="{% url 'accounts:login' %}" class="btn btn-outline">Sign In</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

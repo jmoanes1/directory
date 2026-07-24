@@ -1,0 +1,37 @@
+{# Directory pagination — requires pagination dict and filters.per_page #}
+<nav class="pagination pagination-enhanced" id="pagination" aria-label="Employee list pagination">
+    <div class="pagination-summary" id="paginationSummary">
+        {% if pagination.total_count %}
+        Showing {{ pagination.start_index }}–{{ pagination.end_index }} of {{ pagination.total_count }} employees
+        {% else %}
+        No employees to display
+        {% endif %}
+    </div>
+
+    {% if pagination.num_pages > 1 %}
+    <div class="pagination-controls">
+        <button type="button" class="btn btn-outline btn-sm pagination-nav" data-page="{% if pagination.has_previous %}{{ pagination.current_page|add:'-1' }}{% endif %}" {% if not pagination.has_previous %}disabled{% endif %} aria-label="Previous page">←</button>
+        <div class="pagination-pages">
+            {% for p in pagination.page_window %}
+                {% if p == None %}
+                <span class="pagination-ellipsis">…</span>
+                {% elif p == pagination.current_page %}
+                <span class="pagination-page is-active" aria-current="page">{{ p }}</span>
+                {% else %}
+                <button type="button" class="pagination-page" data-page="{{ p }}">{{ p }}</button>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-outline btn-sm pagination-nav" data-page="{% if pagination.has_next %}{{ pagination.current_page|add:'1' }}{% endif %}" {% if not pagination.has_next %}disabled{% endif %} aria-label="Next page">→</button>
+    </div>
+    {% endif %}
+
+    <div class="pagination-per-page">
+        <label for="perPageSelect">Per page</label>
+        <select id="perPageSelect" class="form-control form-select form-select-sm">
+            {% for size in per_page_options %}
+            <option value="{{ size }}" {% if filters.per_page == size %}selected{% endif %}>{{ size }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</nav>

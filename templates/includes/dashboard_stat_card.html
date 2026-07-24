@@ -1,0 +1,16 @@
+{# Reusable dashboard KPI card — glassmorphism stat tile #}
+<article class="dash-kpi-card">
+    <div class="dash-kpi-card__header">
+        <div class="dash-kpi-icon dash-kpi-icon--{{ accent|default:'primary' }}" aria-hidden="true">
+            {% block icon %}{% endblock %}
+        </div>
+        {% if trend is not None %}
+        <span class="dash-kpi-trend dash-kpi-trend--{% if trend_inverted %}{% if trend > 0 %}down{% elif trend < 0 %}up{% else %}neutral{% endif %}{% else %}{% if trend > 0 %}up{% elif trend < 0 %}down{% else %}neutral{% endif %}{% endif %}">
+            {% if trend > 0 %}▲{% elif trend < 0 %}▼{% else %}—{% endif %}
+            {% if trend != 0 %}{{ trend|floatformat:0 }}%{% else %}0%{% endif %}
+        </span>
+        {% endif %}
+    </div>
+    <p class="dash-kpi-value">{{ value }}</p>
+    <p class="dash-kpi-label">{{ label }}</p>
+</article>

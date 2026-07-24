@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Recruitment - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/recruitment.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="rec-page page-shell">
+
+    <header class="rec-page-header">
+        <div class="rec-page-header-main">
+            <h1>Recruitment</h1>
+            <p class="rec-page-subtitle">Browse openings, manage postings, and track applicants</p>
+        </div>
+        {% if can_manage %}
+        <div class="rec-page-header-actions">
+            <a href="{% url 'recruitment:pipeline' %}" class="btn btn-outline btn-sm">Hiring pipeline</a>
+            <a href="{% url 'recruitment:job_create' %}" class="btn btn-primary btn-sm">Post job</a>
+        </div>
+        {% endif %}
+    </header>
+
+    {% if can_manage %}
+    <nav class="rec-nav" aria-label="Recruitment shortcuts">
+        <a href="{% url 'recruitment:pipeline' %}" class="rec-nav-link">Hiring pipeline</a>
+        <a href="{% url 'recruitment:job_create' %}" class="rec-nav-link">Post job</a>
+    </nav>
+    {% endif %}
+
+    {% if jobs %}
+    <div class="rec-grid">
+        {% for job in jobs %}
+        <article class="rec-card">
+            <h3><a href="{% url 'recruitment:job_detail' job.pk %}">{{ job.title }}</a></h3>
+            <p class="rec-card-meta">{{ job.department.name }} · {{ job.get_employment_type_display }}{% if job.location %} · {{ job.location }}{% endif %}</p>
+            <p class="rec-card-desc">{{ job.description|truncatewords:30 }}</p>
+            <div class="rec-card-footer">
+                <span class="badge badge-{% if job.status == 'open' %}active{% else %}inactive{% endif %}">{{ job.get_status_display }}</span>
+                {% if job.status == 'open' %}
+                <a href="{% url 'recruitment:job_apply' job.pk %}" class="btn btn-sm btn-primary">Apply</a>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="rec-empty">
+        <h3>No job openings</h3>
+        <p>{% if can_manage %}Publish a role to start receiving applications.{% else %}Check back later for new opportunities.{% endif %}</p>
+        {% if can_manage %}
+        <a href="{% url 'recruitment:job_create' %}" class="btn btn-primary btn-sm">Post a job</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Employees - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/employees.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="employees-page page-shell">
+
+    <header class="dir-page-header">
+        <div class="dir-page-header-copy">
+            <h1 class="dir-page-title">Employee Directory</h1>
+            <p class="dir-page-subtitle">Browse, search, and filter everyone in your organization.</p>
+        </div>
+    </header>
+
+    <div class="dir-stats-bar">
+        <div class="dir-stats">
+            <span class="dir-stat">Total employees:<strong id="statTotal">{{ site_total_employees }}</strong></span>
+            <span class="dir-stat">New hires this month:<strong id="statNewHires">{{ site_new_hires }}</strong></span>
+        </div>
+        {% if can_manage %}
+        <div class="dir-actions">
+            <a href="{% url 'employees:create' %}" class="btn btn-teal">Add employee</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="dir-search-row">
+        <div class="dir-search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+            <input type="search" id="searchInput" class="dir-search-input" placeholder="Search by name, email, or department…" value="{{ filters.search }}" autocomplete="off" aria-label="Search employees">
+        </div>
+        <button type="button" class="dir-filter-btn" id="toggleFiltersBtn" aria-expanded="false" aria-controls="filtersPanel" title="Show filters" aria-label="Show filters">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+        </button>
+    </div>
+
+    <div class="dir-filters-panel" id="filtersPanel">
+        <div class="filter-group">
+            <label class="filter-label" for="departmentFilter">Department</label>
+            <select id="departmentFilter" class="form-control form-select" aria-label="Filter by department">
+                <option value="">All departments</option>
+                {% for dept in departments %}
+                <option value="{{ dept.pk }}" {% if filters.department == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label" for="positionFilter">Position</label>
+            <select id="positionFilter" class="form-control form-select" aria-label="Filter by position">
+                <option value="">All positions</option>
+                {% for pos in positions %}
+                <option value="{{ pos.pk }}" {% if filters.position == pos.pk|stringformat:"s" %}selected{% endif %}>{{ pos.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label" for="statusFilter">Status</label>
+            <select id="statusFilter" class="form-control form-select" aria-label="Filter by status">
+                <option value="">All statuses</option>
+                {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label" for="sortFilter">Sort</label>
+            <select id="sortFilter" class="form-control form-select" aria-label="Sort employees">
+                <option value="last_name" {% if filters.sort == "last_name" %}selected{% endif %}>Last name (A–Z)</option>
+                <option value="first_name" {% if filters.sort == "first_name" %}selected{% endif %}>First name (A–Z)</option>
+                <option value="-date_hired" {% if filters.sort == "-date_hired" %}selected{% endif %}>Newest hires</option>
+                <option value="date_hired" {% if filters.sort == "date_hired" %}selected{% endif %}>Oldest hires</option>
+                <option value="department" {% if filters.sort == "department" %}selected{% endif %}>Department</option>
+            </select>
+        </div>
+        <div class="filter-group filter-actions">
+            <label class="filter-label">View</label>
+            <div class="view-toggle" role="group" aria-label="View mode">
+                <button type="button" class="view-btn {% if view_mode == 'card' %}active{% endif %}" data-view="card" title="Card view">Cards</button>
+                <button type="button" class="view-btn {% if view_mode == 'table' %}active{% endif %}" data-view="table" title="Table view">Table</button>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" id="clearFiltersBtn" hidden>Clear</button>
+        </div>
+    </div>
+
+    <div class="active-filters" id="activeFilters" aria-live="polite"></div>
+
+    <div class="emp-results-bar">
+        <span class="results-info" id="resultsCount">{{ pagination.total_count }} employee{{ pagination.total_count|pluralize }}</span>
+    </div>
+
+    <div class="loading-overlay" id="directoryResults">
+        <div class="loading-spinner" aria-hidden="true"></div>
+
+        <div class="dir-grid-headers {% if view_mode != 'card' %}hidden{% endif %}" id="gridHeaders">
+            <span></span>
+            <span>Name</span>
+            <span>Role</span>
+            <span>Company</span>
+            <span>Actions</span>
+            <span>QR</span>
+        </div>
+
+        <div id="cardView" class="dir-alpha-grid {% if view_mode != 'card' %}hidden{% endif %}">
+            {% regroup employees by last_name|first|upper as alpha_groups %}
+            {% for group in alpha_groups %}
+            <section class="dir-alpha-group">
+                <span class="dir-alpha-letter" aria-hidden="true">{{ group.grouper }}</span>
+                <div class="dir-alpha-cards">
+                    {% for emp in group.list %}
+                    {% include "includes/directory_employee_card.html" with emp=emp %}
+                    {% endfor %}
+                </div>
+            </section>
+            {% empty %}
+            {% include "includes/empty_state.html" with icon="◎" title="No employees found" message="Try a different search or clear your filters." secondary_url="#" secondary_label="Clear filters" %}
+            {% endfor %}
+        </div>
+
+        <div id="tableView" class="table-responsive {% if view_mode != 'table' %}hidden{% endif %}">
+            <table class="data-table emp-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>ID</th>
+                        <th>Department</th>
+                        <th>Position</th>
+                        <th>Status</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    {% for emp in employees %}
+                    <tr class="emp-table-row" data-href="{% url 'employees:detail' emp.pk %}" tabindex="0" role="link" aria-label="View {{ emp.full_name }}">
+                        <td>
+                            <a href="{% url 'employees:detail' emp.pk %}" class="table-employee">
+                                {% if emp.profile_photo %}
+                                {% include "includes/avatar.html" with css_class="avatar-sm" photo_url=emp.profile_photo.url initials=emp.initials %}
+                                {% else %}
+                                {% include "includes/avatar.html" with css_class="avatar-sm" initials=emp.initials %}
+                                {% endif %}
+                                {{ emp.full_name }}
+                            </a>
+                        </td>
+                        <td>{{ emp.employee_id }}</td>
+                        <td>{{ emp.department.name }}</td>
+                        <td>{{ emp.position.title }}</td>
+                        <td><span class="badge badge-{{ emp.employment_status }}">{{ emp.get_employment_status_display }}</span></td>
+                        <td>{{ emp.email }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6">{% include "includes/empty_state.html" with icon="◎" title="No employees found" message="Adjust your search or filters." compact=1 %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% include "includes/directory_pagination.html" %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/directory.js' %}"></script>
+{% endblock %}

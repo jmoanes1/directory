@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Org Chart - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/org-chart.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="org-chart-page page-shell">
+
+    <header class="org-page-header">
+        <div class="org-page-header-main">
+            <h1>Org chart</h1>
+            <p class="org-page-subtitle">Reporting hierarchy — click a person to open their profile</p>
+        </div>
+        <div class="org-page-header-actions">
+            <a href="{% url 'employees:team_hierarchy' %}" class="btn btn-outline btn-sm">Team view</a>
+        </div>
+    </header>
+
+    <section class="org-stats" aria-label="Organization summary">
+        <article class="org-stat">
+            <span class="org-stat-value">{{ stats.total_employees }}</span>
+            <span class="org-stat-label">Total</span>
+        </article>
+        <article class="org-stat">
+            <span class="org-stat-value">{{ stats.managers }}</span>
+            <span class="org-stat-label">Managers</span>
+        </article>
+        <article class="org-stat">
+            <span class="org-stat-value">{{ stats.top_level }}</span>
+            <span class="org-stat-label">Top level</span>
+        </article>
+        <article class="org-stat">
+            <span class="org-stat-value">{{ stats.with_manager }}</span>
+            <span class="org-stat-label">With manager</span>
+        </article>
+    </section>
+
+    <div class="org-chart-panel">
+        <div class="org-chart-toolbar">
+            <label class="org-chart-filter" for="rootFilter">
+                <span>View</span>
+                <select id="rootFilter" class="form-control form-select">
+                    <option value="">Full organization</option>
+                    {% for mgr in top_managers %}
+                    <option value="{{ mgr.pk }}" {% if root_employee and root_employee.pk == mgr.pk %}selected{% endif %}>{{ mgr.full_name }}'s team</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <div class="org-chart-legend">
+                <span class="org-legend-item"><span class="org-legend-dot org-legend-dot--manager"></span> Manager</span>
+                <span class="org-legend-item"><span class="org-legend-dot org-legend-dot--ic"></span> Individual contributor</span>
+            </div>
+        </div>
+
+        <div id="orgChartCanvas" class="org-chart-canvas">
+            <svg id="orgChartSvg" role="img" aria-label="Organization chart"></svg>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>window.orgTreeData = {{ org_tree_json|safe }};</script>
+<script src="{% static 'js/org-chart.js' %}"></script>
+{% endblock %}

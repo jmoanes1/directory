@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Team Hierarchy - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/team-hierarchy.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="team-hierarchy-page page-shell">
+
+    <header class="th-page-header">
+        <div class="th-page-header-main">
+            <h1>Team hierarchy</h1>
+            <p class="th-page-subtitle">
+                {% if hierarchy %}
+                {{ hierarchy|length }} department{{ hierarchy|length|pluralize }} · teams grouped by reporting manager
+                {% else %}
+                Department teams organized by reporting managers
+                {% endif %}
+            </p>
+        </div>
+        <div class="th-page-header-actions">
+            <a href="{% url 'employees:org_chart' %}" class="btn btn-outline btn-sm">Org chart</a>
+        </div>
+    </header>
+
+    {% if hierarchy %}
+    <div id="hierarchyContainer" class="th-container">
+        {% for dept in hierarchy %}
+        <section class="th-dept">
+            <header class="th-dept-header">
+                <div class="th-dept-title">
+                    <h2>{{ dept.name }}</h2>
+                    <span class="badge badge-outline">{{ dept.employee_count }} people</span>
+                </div>
+                {% if dept.head %}
+                <p class="th-dept-head">
+                    <span class="th-dept-head-label">Department head</span>
+                    <a href="{% url 'employees:detail' dept.head.id %}">{{ dept.head.name }}</a>
+                    <span class="th-dept-head-role">{{ dept.head.position }}</span>
+                </p>
+                {% endif %}
+            </header>
+
+            <div class="th-teams">
+                {% for team in dept.teams %}
+                <article class="th-team">
+                    <a href="{% url 'employees:detail' team.manager.id %}" class="th-manager">
+                        {% include "includes/avatar.html" with css_class="avatar-sm" initials=team.manager.name|slice:":1" %}
+                        <span class="th-manager-info">
+                            <strong>{{ team.manager.name }}</strong>
+                            <span>{{ team.manager.position }}</span>
+                        </span>
+                        <span class="th-team-count">{{ team.members|length }} report{{ team.members|length|pluralize }}</span>
+                    </a>
+                    <div class="th-members">
+                        {% for member in team.members %}
+                        <a href="{% url 'employees:detail' member.id %}" class="th-member">
+                            {% include "includes/avatar.html" with css_class="avatar-xs" initials=member.name|slice:":1" %}
+                            <span>{{ member.name }}</span>
+                        </a>
+                        {% empty %}
+                        <p class="th-members-empty">No direct reports</p>
+                        {% endfor %}
+                    </div>
+                </article>
+                {% empty %}
+                <div class="th-empty-inline">
+                    <p>Assign managers to employees to build team structures.</p>
+                </div>
+                {% endfor %}
+
+                {% if dept.unassigned %}
+                <div class="th-unassigned">
+                    <h3>Unassigned</h3>
+                    <div class="th-members">
+                        {% for member in dept.unassigned %}
+                        <a href="{% url 'employees:detail' member.id %}" class="th-member">
+                            {% include "includes/avatar.html" with css_class="avatar-xs" initials=member.name|slice:":1" %}
+                            <span>{{ member.name }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="th-empty">
+        <h3>No departments</h3>
+        <p>Create departments and assign managers to see team hierarchy.</p>
+        <a href="{% url 'departments:list' %}" class="btn btn-outline btn-sm">View departments</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

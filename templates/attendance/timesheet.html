@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static attendance_extras %}
+
+{% block title %}Timesheet - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/attendance.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="attendance-page page-shell attendance-subpage">
+
+    <header class="att-page-header">
+        <div class="att-page-header-main">
+            <h1>My timesheet</h1>
+            <p class="att-page-subtitle">{{ employee.full_name }} · {{ period_label }} · {{ timezone_label }}</p>
+        </div>
+        <div class="att-page-header-actions">
+            <a href="{% url 'attendance:dashboard' %}" class="btn btn-outline btn-sm">Attendance</a>
+            <a href="{% url 'attendance:leave_list' %}" class="btn btn-outline btn-sm">Leave history</a>
+        </div>
+    </header>
+
+    <div class="att-section">
+        <div class="att-section-body timesheet-toolbar-body">
+            <div class="timesheet-period-tabs">
+                <a href="?period=week&date={{ anchor_date|date:'Y-m-d' }}" class="btn btn-sm {% if period == 'week' %}btn-primary{% else %}btn-outline{% endif %}">Weekly</a>
+                <a href="?period=month&date={{ anchor_date|date:'Y-m-d' }}" class="btn btn-sm {% if period == 'month' %}btn-primary{% else %}btn-outline{% endif %}">Monthly</a>
+            </div>
+            <div class="timesheet-nav">
+                <a href="?period={{ period }}&date={{ prev_anchor|date:'Y-m-d' }}" class="btn btn-outline btn-sm">Previous</a>
+                <strong class="timesheet-period-label">{{ period_label }}</strong>
+                <a href="?period={{ period }}&date={{ next_anchor|date:'Y-m-d' }}" class="btn btn-outline btn-sm">Next</a>
+            </div>
+            <div class="timesheet-live-clock">
+                <span class="att-clock-label">Local time</span>
+                <strong id="timesheetClock">{{ current_local_time|attendance_time }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <section class="att-stats">
+        <article class="att-stat">
+            <span class="att-stat-value">{{ summary.total_hours_display }}</span>
+            <span class="att-stat-label">Total hours</span>
+        </article>
+        <article class="att-stat">
+            <span class="att-stat-value">{{ summary.complete_days }}</span>
+            <span class="att-stat-label">Complete days</span>
+        </article>
+        <article class="att-stat">
+            <span class="att-stat-value">{{ summary.partial_days }}</span>
+            <span class="att-stat-label">Partial days</span>
+        </article>
+        <article class="att-stat">
+            <span class="att-stat-value">{{ summary.average_hours_display }}</span>
+            <span class="att-stat-label">Avg / day</span>
+        </article>
+    </section>
+
+    <section class="att-section">
+        <div class="att-section-header">
+            <h2>Daily time log</h2>
+            <span class="att-section-meta">{{ records|length }} day{{ records|length|pluralize }} in period</span>
+        </div>
+        <div class="att-section-body att-section-body-flush">
+            {% if records %}
+            <div class="table-responsive">
+                <table class="data-table timesheet-table att-table">
+                    <thead>
+                        <tr>
+                            <th>Mode</th>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Morning in</th>
+                            <th>Lunch out</th>
+                            <th>Noon in</th>
+                            <th>Afternoon out</th>
+                            <th>Break</th>
+                            <th>Morning</th>
+                            <th>Afternoon</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rec in records %}
+                        <tr class="{% if rec.is_day_complete %}timesheet-row-complete{% elif rec.time_in_morning %}timesheet-row-partial{% endif %}">
+                            <td>{% if rec.is_wfh %}WFH{% else %}Office{% endif %}</td>
+                            <td>{{ rec.date|date:"M d, Y" }}</td>
+                            <td>{{ rec.date|date:"D" }}</td>
+                            <td>{{ rec.time_in_morning|attendance_time }}</td>
+                            <td>{{ rec.break_lunch|attendance_time }}</td>
+                            <td>{{ rec.time_in_noon|attendance_time }}</td>
+                            <td>{{ rec.time_out_afternoon|attendance_time }}</td>
+                            <td>{{ rec.break_duration_display }}</td>
+                            <td>{{ rec.morning_hours_display }}</td>
+                            <td>{{ rec.afternoon_hours_display }}</td>
+                            <td><strong>{{ rec.hours_worked_display }}</strong></td>
+                            <td><span class="badge badge-{{ rec.status }}">{{ rec.get_status_display }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="timesheet-total-row">
+                            <td colspan="10"><strong>Period total</strong></td>
+                            <td><strong>{{ summary.total_hours_display }}</strong></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            {% else %}
+            <div class="att-empty-inline">
+                <p>No attendance punches recorded for this period.</p>
+                <a href="{% url 'attendance:dashboard' %}" class="btn btn-primary btn-sm">Go to attendance</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.body.dataset.serverTimestamp = "{{ server_timestamp_ms }}";
+</script>
+<script src="{% static 'js/attendance.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ review.employee.full_name }} — {{ review.review_period }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/performance.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="perf-page page-shell">
+
+    <nav class="perf-breadcrumb">
+        <a href="{% url 'performance:dashboard' %}">Performance</a>
+        <span>/</span>
+        <span>{{ review.review_period }}</span>
+    </nav>
+
+    <header class="perf-page-header">
+        <div class="perf-page-header-main">
+            <h1>{{ review.employee.full_name }}</h1>
+            <p class="perf-page-subtitle">{{ review.review_period }} · {{ review.period_start|date:"M d" }} – {{ review.period_end|date:"M d, Y" }}</p>
+        </div>
+        <div class="perf-review-header-meta">
+            <span class="perf-rating">{{ review.overall_rating }}/5</span>
+            <span class="badge badge-outline">{{ review.get_status_display }}</span>
+        </div>
+    </header>
+
+    <div class="perf-detail-panels">
+        {% if review.strengths %}
+        <section class="perf-section">
+            <div class="perf-section-header"><h2>Strengths</h2></div>
+            <div class="perf-section-body" style="padding:1rem 1.125rem">{{ review.strengths|linebreaksbr }}</div>
+        </section>
+        {% endif %}
+        {% if review.areas_for_improvement %}
+        <section class="perf-section">
+            <div class="perf-section-header"><h2>Areas for improvement</h2></div>
+            <div class="perf-section-body" style="padding:1rem 1.125rem">{{ review.areas_for_improvement|linebreaksbr }}</div>
+        </section>
+        {% endif %}
+        {% if review.goals_summary %}
+        <section class="perf-section perf-section--full">
+            <div class="perf-section-header"><h2>Goals summary</h2></div>
+            <div class="perf-section-body" style="padding:1rem 1.125rem">{{ review.goals_summary|linebreaksbr }}</div>
+        </section>
+        {% endif %}
+        {% if review.manager_feedback %}
+        <section class="perf-section perf-section--full">
+            <div class="perf-section-header"><h2>Manager feedback</h2></div>
+            <div class="perf-section-body" style="padding:1rem 1.125rem">{{ review.manager_feedback|linebreaksbr }}</div>
+        </section>
+        {% endif %}
+        <section class="perf-section">
+            <div class="perf-section-header"><h2>Details</h2></div>
+            <div class="perf-section-body" style="padding:1rem 1.125rem">
+                <dl class="perf-detail-list">
+                    <div><dt>Reviewer</dt><dd>{{ review.reviewer.get_full_name|default:review.reviewer.username|default:"—" }}</dd></div>
+                    <div><dt>Created</dt><dd>{{ review.created_at|date:"M d, Y" }}</dd></div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/departments.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="departments-page page-shell departments-form-page">
+
+    <nav class="dept-breadcrumb">
+        <a href="{% url 'departments:list' %}">Departments</a>
+        <span>/</span>
+        <span>{{ title }}</span>
+    </nav>
+
+    <header class="dept-page-header">
+        <div class="dept-page-header-main">
+            <h1>{{ title }}</h1>
+            <p class="dept-page-subtitle">Update department details and leadership</p>
+        </div>
+    </header>
+
+    <div class="card dept-form-card">
+        <div class="card-body">
+            <form method="post" class="form-grid dept-form" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group {% if field.name == 'description' %}form-group-full{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                </div>
+                {% endfor %}
+                <div class="form-actions form-group-full">
+                    <button type="submit" class="btn btn-primary">Save department</button>
+                    <a href="{% url 'departments:list' %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

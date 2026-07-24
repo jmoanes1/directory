@@ -1,0 +1,11 @@
+{% comment %}
+Reusable avatar — images are always inside a sized wrapper.
+Usage: {% include "includes/avatar.html" with css_class="avatar-profile" photo_url=url initials="JD" alt="Name" %}
+{% endcomment %}
+{% if photo_url %}
+<div class="avatar {{ css_class }}"{% if id %} id="{{ id }}"{% endif %}>
+    <img src="{{ photo_url }}" alt="{{ alt|default:'' }}">
+</div>
+{% else %}
+<div class="avatar {{ css_class }}"{% if id %} id="{{ id }}"{% endif %}>{{ initials }}</div>
+{% endif %}

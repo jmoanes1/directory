@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="calendar-page page-shell cal-form-page">
+
+    <nav class="cal-breadcrumb">
+        <a href="{% url 'company_calendar:home' %}">Company Calendar</a>
+        <span>/</span>
+        <span>{{ title }}</span>
+    </nav>
+
+    <header class="cal-page-header">
+        <div class="cal-page-header-main">
+            <h1>{{ title }}</h1>
+            <p class="cal-page-subtitle">Schedule a holiday or company-wide event for all employees</p>
+        </div>
+    </header>
+
+    <div class="cal-form-card">
+        <form method="post" class="form-grid cal-form" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group {% if field.name in 'title,description' %}form-group-full{% endif %}{% if field.name == 'is_active' %} form-group-checkbox{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                {{ field }}
+                {% if field.help_text %}<span class="text-muted text-sm">{{ field.help_text }}</span>{% endif %}
+                {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+            </div>
+            {% endfor %}
+            <div class="form-actions form-group-full cal-form-actions">
+                <button type="submit" class="btn btn-primary">Save entry</button>
+                <a href="{% url 'company_calendar:home' %}" class="btn btn-outline">Cancel</a>
+                {% if entry %}
+                <button
+                    type="button"
+                    class="btn btn-outline btn-icon-danger cal-form-delete"
+                    data-modal="delete"
+                    data-url="{% url 'company_calendar:delete' entry.pk %}"
+                    data-name="{{ entry.title }}"
+                    title="Delete entry"
+                    aria-label="Delete {{ entry.title }}"
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6"/></svg>
+                    Delete
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

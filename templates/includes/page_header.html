@@ -1,0 +1,30 @@
+{# Reusable page header with optional breadcrumb, back link, and help text #}
+<div class="page-wayfinding">
+    {% if breadcrumb %}
+    <nav class="breadcrumb-trail" aria-label="Breadcrumb">
+        {% for item in breadcrumb %}
+            {% if not forloop.first %}<span class="sep">/</span>{% endif %}
+            {% if item.url and not forloop.last %}
+            <a href="{{ item.url }}">{{ item.label }}</a>
+            {% else %}
+            <span class="current">{{ item.label }}</span>
+            {% endif %}
+        {% endfor %}
+    </nav>
+    {% elif back_url %}
+    <a href="{{ back_url }}" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        {{ back_label|default:"Back" }}
+    </a>
+    {% endif %}
+</div>
+
+<div class="page-header {% if actions %}flex-between{% endif %}">
+    <div>
+        {% if badge %}<span class="page-header-badge">{{ badge }}</span>{% endif %}
+        <h1>{{ title }}</h1>
+        {% if subtitle %}<p class="text-muted">{{ subtitle }}</p>{% endif %}
+        {% if help_text %}<p class="page-help-text">{{ help_text }}</p>{% endif %}
+    </div>
+    {% if actions %}<div class="page-actions">{{ actions }}</div>{% endif %}
+</div>

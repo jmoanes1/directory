@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ employee.full_name }} - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/employees.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="employee-profile-page">
+    <nav class="breadcrumb">
+        <a href="{% url 'employees:list' %}">Employees</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>{{ employee.full_name }}</span>
+    </nav>
+
+    <header class="profile-hero">
+        <div class="profile-hero-photo">
+            {% if employee.profile_photo %}
+            {% include "includes/avatar.html" with css_class="avatar-profile" photo_url=employee.profile_photo.url initials=employee.initials alt=employee.full_name %}
+            {% else %}
+            {% include "includes/avatar.html" with css_class="avatar-profile" initials=employee.initials %}
+            {% endif %}
+        </div>
+
+        <div class="profile-hero-main">
+            <h1>{{ employee.full_name }}</h1>
+            <p class="profile-hero-subtitle">{{ employee.position.title }} · {{ employee.department.name }}</p>
+            <div class="profile-hero-badges">
+                <span class="badge badge-{{ employee.employment_status }}">{{ employee.get_employment_status_display }}</span>
+                <span class="badge badge-outline">{{ employee.employee_id }}</span>
+            </div>
+            <div class="profile-completion-inline">
+                <span>Profile</span>
+                <div class="profile-completion-bar">
+                    <div class="profile-completion-fill" style="width:{{ employee.profile_completion }}%"></div>
+                </div>
+                <strong>{{ employee.profile_completion }}%</strong>
+            </div>
+        </div>
+
+        <div class="profile-hero-actions">
+            {% if can_manage %}
+            <a href="{% url 'employees:edit' employee.pk %}" class="btn btn-primary btn-sm">Edit</a>
+            {% if not employee.user and can_manage and user.can_manage_employee_accounts %}
+            <a href="{% url 'accounts:employee_account_create' %}?employee={{ employee.pk }}" class="btn btn-outline btn-sm">Create Account</a>
+            {% endif %}
+            <form action="{% url 'employees:toggle_active' employee.pk %}" method="post" class="inline-form">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline btn-sm">{% if employee.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+            </form>
+            <button type="button" class="btn btn-outline btn-sm btn-icon-danger" data-modal="delete" data-url="{% url 'employees:delete' employee.pk %}" data-name="{{ employee.full_name }}" title="Delete" aria-label="Delete">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6"/></svg>
+            </button>
+            {% endif %}
+            <a href="{% url 'employees:id_card' employee.pk %}" class="btn btn-outline btn-sm">ID Card</a>
+            <a href="{% url 'employees:qr' employee.pk %}" class="btn btn-outline btn-sm" target="_blank">QR</a>
+        </div>
+    </header>
+
+    <nav class="profile-quick-nav">
+        <a href="#contact">Contact</a>
+        <a href="#employment">Employment</a>
+        <a href="#personal">Personal</a>
+        <a href="#skills">Skills</a>
+        <a href="#timeline">Timeline</a>
+        <a href="#documents">Documents</a>
+        {% if employee.has_social_links %}<a href="#social">Social</a>{% endif %}
+        <a href="#recognition">Awards</a>
+        {% if employee.bio %}<a href="#bio">Bio</a>{% endif %}
+        <a href="#activity">Activity</a>
+    </nav>
+
+    <div class="detail-grid">
+        <div class="card" id="contact">
+            <div class="card-header">
+                <h3>Contact</h3>
+            </div>
+            <div class="card-body">
+                <dl class="detail-list">
+                    <dt>Email</dt><dd><a href="mailto:{{ employee.email }}">{{ employee.email }}</a></dd>
+                    <dt>Phone</dt><dd>{{ employee.phone_number|default:"—" }}</dd>
+                    <dt>Address</dt><dd>{{ employee.address|default:"—"|linebreaksbr }}</dd>
+                    <dt>Emergency</dt><dd>{{ employee.emergency_contact|default:"—" }}</dd>
+                    {% if employee.emergency_contact_name %}
+                    <dt>Contact</dt><dd>{{ employee.emergency_contact_name }}</dd>
+                    <dt>Phone</dt><dd>{{ employee.emergency_contact_phone|default:"—" }}</dd>
+                    <dt>Relation</dt><dd>{{ employee.emergency_contact_relationship|default:"—" }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+
+        <div class="card" id="employment">
+            <div class="card-header">
+                <h3>Employment</h3>
+            </div>
+            <div class="card-body">
+                <dl class="detail-list">
+                    <dt>Department</dt><dd><a href="{% url 'departments:list' %}">{{ employee.department.name }}</a></dd>
+                    <dt>Position</dt><dd>{{ employee.position.title }}</dd>
+                    <dt>Manager</dt>
+                    <dd>{% if employee.manager %}<a href="{% url 'employees:detail' employee.manager.pk %}">{{ employee.manager.full_name }}</a>{% else %}—{% endif %}</dd>
+                    <dt>Login account</dt>
+                    <dd>
+                        {% if employee.user %}
+                        <span class="badge badge-active">@{{ employee.user.username }}</span>
+                        {% elif can_manage and user.can_manage_employee_accounts and not employee.user %}
+                        <a href="{% url 'accounts:employee_account_create' %}?employee={{ employee.pk }}" class="btn btn-sm btn-outline">Create Account</a>
+                        {% else %}
+                        —
+                        {% endif %}
+                    </dd>
+                    <dt>Hired</dt><dd>{{ employee.date_hired|date:"M d, Y" }}</dd>
+                    <dt>Location</dt><dd>{{ employee.get_work_location_display }}</dd>
+                    <dt>Availability</dt><dd>{{ employee.get_availability_status_display }}</dd>
+                    <dt>Status</dt><dd>{{ employee.get_employment_status_display }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card" id="personal">
+            <div class="card-header">
+                <h3>Personal</h3>
+            </div>
+            <div class="card-body">
+                <dl class="detail-list">
+                    <dt>Birthday</dt><dd>{{ employee.date_of_birth|date:"M d, Y"|default:"—" }}</dd>
+                    <dt>Gender</dt><dd>{{ employee.get_gender_display|default:"—" }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card" id="skills">
+            <div class="card-header">
+                <h3>Skills</h3>
+                <a href="{% url 'employees:skills_matrix' %}" class="btn btn-sm btn-outline">Matrix</a>
+            </div>
+            <div class="card-body">
+                {% if employee.skills.all %}
+                <div class="skill-tags">
+                    {% for es in employee.skills.all %}
+                    <span class="skill-tag">
+                        {{ es.skill.name }}
+                        <small>{{ es.get_proficiency_display }}</small>
+                    </span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-sm">No skills assigned yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if employee.has_social_links %}
+        <div class="card" id="social">
+            <div class="card-header">
+                <h3>Social links</h3>
+            </div>
+            <div class="card-body">
+                <div class="social-links">
+                    {% if employee.linkedin_url %}<a href="{{ employee.linkedin_url }}" target="_blank" rel="noopener" class="social-link">LinkedIn</a>{% endif %}
+                    {% if employee.github_url %}<a href="{{ employee.github_url }}" target="_blank" rel="noopener" class="social-link">GitHub</a>{% endif %}
+                    {% if employee.twitter_url %}<a href="{{ employee.twitter_url }}" target="_blank" rel="noopener" class="social-link">Twitter</a>{% endif %}
+                    {% if employee.website_url %}<a href="{{ employee.website_url }}" target="_blank" rel="noopener" class="social-link">Website</a>{% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card" id="timeline">
+            <div class="card-header">
+                <h3>Career timeline</h3>
+            </div>
+            <div class="card-body">
+                {% if employee.timeline_events.all %}
+                <div class="timeline-list">
+                    {% for event in employee.timeline_events.all %}
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div>
+                            <strong>{{ event.title }}</strong>
+                            <span class="badge badge-outline text-sm">{{ event.get_event_type_display }}</span>
+                            {% if event.description %}<p class="text-muted text-sm">{{ event.description }}</p>{% endif %}
+                            <time class="text-muted text-sm">{{ event.event_date|date:"M d, Y" }}</time>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-sm">No timeline events recorded.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card" id="documents">
+            <div class="card-header">
+                <h3>Documents</h3>
+            </div>
+            <div class="card-body">
+                {% if employee.documents.all %}
+                <ul class="doc-list-compact">
+                    {% for doc in employee.documents.all %}
+                    <li>
+                        <span>{{ doc.title }} <small class="text-muted">({{ doc.get_document_type_display }})</small></span>
+                        <a href="{% url 'portal:document_download' doc.pk %}" class="btn btn-sm btn-outline">Download</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-sm">No documents on file.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card" id="recognition">
+            <div class="card-header">
+                <h3>Recognition</h3>
+                <a href="{% url 'employees:recognition_wall' %}" class="btn btn-sm btn-outline">Wall</a>
+            </div>
+            <div class="card-body">
+                {% if employee.recognitions.all %}
+                <div class="recognition-mini-list">
+                    {% for rec in employee.recognitions.all %}
+                    <div class="recognition-mini-item">
+                        <strong>{{ rec.title }}</strong>
+                        <span class="text-muted text-sm">{{ rec.get_category_display }} · {{ rec.awarded_date|date:"M Y" }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-sm">No awards recorded yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if leave_balances %}
+        <div class="card" id="leave-balance">
+            <div class="card-header">
+                <h3>Leave balance</h3>
+            </div>
+            <div class="card-body">
+                <div class="leave-balance-grid">
+                    {% for b in leave_balances %}
+                    <div class="leave-balance-item">
+                        <span class="leave-balance-type">{{ b.leave_type.name }}</span>
+                        <span><strong>{{ b.remaining }}</strong> / {{ b.entitled }} days</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if employee.bio %}
+        <div class="card card-full" id="bio">
+            <div class="card-header"><h3>Bio</h3></div>
+            <div class="card-body"><p class="text-sm" style="line-height:1.65">{{ employee.bio|linebreaksbr }}</p></div>
+        </div>
+        {% endif %}
+
+        <div class="card card-full" id="activity">
+            <div class="card-header"><h3>Activity</h3></div>
+            <div class="card-body">
+                {% if activity_logs %}
+                <div class="activity-list">
+                    {% for log in activity_logs %}
+                    <div class="activity-item">
+                        <span class="activity-action">{{ log.get_action_display }}</span>
+                        <span>{{ log.description }}</span>
+                        <span class="text-muted text-sm">{{ log.created_at|date:"M d, H:i" }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state compact-empty">
+                    <p class="text-muted text-sm">No activity recorded for this profile yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.profile-quick-nav a').forEach(link => {
+    link.addEventListener('click', function(e) {
+        const id = this.getAttribute('href');
+        if (id.startsWith('#')) {
+            e.preventDefault();
+            document.querySelector(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
+</script>
+{% endblock %}

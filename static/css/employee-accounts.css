@@ -1,0 +1,344 @@
+/* Employee Accounts — clean admin layout */
+
+.ea-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+}
+
+.ea-form-page {
+    max-width: 960px;
+}
+
+.ea-credentials-wrap {
+    max-width: 560px;
+}
+
+.ea-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.ea-page-header--profile {
+    align-items: center;
+}
+
+.ea-page-header-main h1,
+.ea-profile-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 0 0 0.25rem;
+    color: var(--text-primary);
+}
+
+.ea-page-subtitle {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.ea-page-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.ea-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.ea-breadcrumb {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin-bottom: -0.5rem;
+}
+
+.ea-breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.ea-breadcrumb a:hover {
+    color: var(--color-primary);
+}
+
+.ea-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+    padding: 1rem 1.125rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+}
+
+.ea-filters .form-group {
+    margin: 0;
+    min-width: 140px;
+    flex: 1;
+}
+
+.ea-filters label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-bottom: 0.375rem;
+}
+
+.ea-table-section {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+}
+
+.ea-table-empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+}
+
+.ea-account-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ea-account-user strong {
+    display: block;
+    font-size: 0.875rem;
+}
+
+.ea-account-user span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.ea-actions-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.ea-btn-with-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.ea-btn-with-icon svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.ea-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.ea-section {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+}
+
+.ea-section-header {
+    padding: 0.875rem 1.125rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-body);
+}
+
+.ea-section-header h2 {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ea-section-body {
+    padding: 1rem 1.125rem 1.125rem;
+}
+
+.ea-detail-list {
+    margin: 0;
+    display: grid;
+    gap: 0.625rem;
+}
+
+.ea-detail-list dt {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.ea-detail-list dd {
+    margin: 0.125rem 0 0;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.ea-form-section {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.ea-form-section-header {
+    padding: 0.875rem 1.125rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-body);
+}
+
+.ea-form-section-header h2 {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ea-form-section-header p {
+    margin: 0.125rem 0 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.ea-form-section-body {
+    padding: 1.25rem;
+}
+
+.ea-form-section-body .form-grid {
+    gap: 1rem;
+}
+
+.ea-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.ea-credentials-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+}
+
+.ea-credentials-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-body);
+}
+
+.ea-credentials-header h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.ea-credentials-header p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.ea-credentials-body {
+    padding: 1.25rem 1.5rem;
+}
+
+.ea-credentials-note {
+    margin: 0 0 1rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.ea-credential-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 1rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-body);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+}
+
+.ea-credential-label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.ea-credential-row code {
+    font-family: ui-monospace, monospace;
+    font-size: 0.875rem;
+    color: var(--color-primary);
+    word-break: break-all;
+}
+
+.ea-credentials-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+}
+
+.access-denied-page {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.access-denied-card {
+    max-width: 440px;
+    text-align: center;
+    padding: 2rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+}
+
+.access-denied-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+#generatePasswordWrap.is-hidden {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .ea-filters .form-group {
+        min-width: 100%;
+    }
+}

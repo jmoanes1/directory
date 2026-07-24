@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Notifications - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/system-pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sys-page page-shell">
+
+    <header class="sys-page-header">
+        <div class="sys-page-header-main">
+            <h1>Notifications</h1>
+            <p class="sys-page-subtitle">{{ unread_count }} unread notification{{ unread_count|pluralize }}</p>
+        </div>
+        {% if unread_count %}
+        <div class="sys-page-header-actions">
+            <form action="{% url 'notifications:mark_all_read' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline btn-sm">Mark all read</button>
+            </form>
+        </div>
+        {% endif %}
+    </header>
+
+    <nav class="sys-nav" aria-label="Notification filters">
+        <a href="?status=all" class="sys-nav-link {% if status == 'all' %}is-active{% endif %}">All</a>
+        <a href="?status=unread" class="sys-nav-link {% if status == 'unread' %}is-active{% endif %}">Unread</a>
+        <a href="?status=read" class="sys-nav-link {% if status == 'read' %}is-active{% endif %}">Read</a>
+    </nav>
+
+    <div class="sys-section">
+        {% if notifications %}
+        <div class="sys-notif-list">
+            {% for n in notifications %}
+            <form action="{% url 'notifications:mark_read' n.pk %}" method="post" class="sys-notif-item {% if not n.is_read %}is-unread{% endif %}">
+                {% csrf_token %}
+                <button type="submit" class="sys-notif-btn">
+                    <div class="sys-notif-top">
+                        <span class="sys-notif-type">{{ n.get_notification_type_display }}</span>
+                        <time>{{ n.created_at|date:"M d, Y H:i" }}</time>
+                    </div>
+                    <strong>{{ n.title }}</strong>
+                    <p>{{ n.message }}</p>
+                </button>
+            </form>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="sys-empty">
+            <h3>No notifications</h3>
+            <p>Leave updates, announcements, and system alerts will appear here.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

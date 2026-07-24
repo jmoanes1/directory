@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Self-Service - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/portal.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ss-page page-shell">
+
+    <header class="ss-page-header">
+        <div class="ss-page-header-main">
+            <h1>Self-service</h1>
+            <p class="ss-page-subtitle">Manage your profile, documents, attendance, and leave</p>
+        </div>
+        {% if employee %}
+        <div class="ss-profile-meter" aria-label="Profile completion {{ profile_completion }} percent">
+            <span class="ss-profile-meter-label">Profile {{ profile_completion }}%</span>
+            <div class="profile-completion-bar">
+                <div class="profile-completion-fill" style="width:{{ profile_completion }}%"></div>
+            </div>
+        </div>
+        {% endif %}
+    </header>
+
+    {% if employee %}
+    <nav class="ss-nav" aria-label="Self-service shortcuts">
+        <a href="{% url 'portal:profile' %}" class="ss-nav-link">Personal info</a>
+        <a href="{% url 'portal:documents' %}" class="ss-nav-link">Documents{% if documents_count %} ({{ documents_count }}){% endif %}</a>
+        <a href="{% url 'attendance:dashboard' %}" class="ss-nav-link">Attendance</a>
+        <a href="{% url 'attendance:leave_request' %}" class="ss-nav-link">Request leave</a>
+        <a href="{% url 'employees:id_card' employee.pk %}" class="ss-nav-link">ID card</a>
+        <a href="{% url 'employees:detail' employee.pk %}" class="ss-nav-link">Full profile</a>
+    </nav>
+
+    <div class="ss-cards">
+        <a href="{% url 'portal:profile' %}" class="ss-card">
+            <strong>Personal info</strong>
+            <span>Contact, emergency details, and social links</span>
+        </a>
+        <a href="{% url 'portal:documents' %}" class="ss-card">
+            <strong>Documents</strong>
+            <span>{{ documents_count }} file{{ documents_count|pluralize }} · resume and certificates</span>
+        </a>
+        <a href="{% url 'attendance:dashboard' %}" class="ss-card">
+            <strong>Attendance</strong>
+            <span>{% if today_attendance and today_attendance.time_in_morning %}In progress today{% else %}Record today's attendance{% endif %}</span>
+        </a>
+        <a href="{% url 'attendance:leave_request' %}" class="ss-card">
+            <strong>Request leave</strong>
+            <span>Submit and track time-off requests</span>
+        </a>
+    </div>
+
+    <div class="ss-panels">
+        <section class="ss-section">
+            <div class="ss-section-header">
+                <h2>Leave balances</h2>
+            </div>
+            <div class="ss-section-body">
+                {% if leave_balances %}
+                <div class="ss-balance-list">
+                    {% for b in leave_balances %}
+                    <div class="ss-balance-item">
+                        <span class="ss-balance-type" style="border-left-color:{{ b.leave_type.color }}">{{ b.leave_type.name }}</span>
+                        <span class="ss-balance-meta"><strong>{{ b.remaining }}</strong> remaining · {{ b.used }}/{{ b.entitled }} used</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="ss-muted">No leave types configured.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="ss-section">
+            <div class="ss-section-header">
+                <h2>Recent leave requests</h2>
+                <a href="{% url 'attendance:leave_list' %}" class="btn btn-sm btn-outline">View all</a>
+            </div>
+            <div class="ss-section-body">
+                {% if recent_leaves %}
+                <ul class="ss-list">
+                    {% for leave in recent_leaves %}
+                    <li>
+                        <span>{{ leave.leave_type.name }}</span>
+                        <span class="badge badge-{{ leave.status }}">{{ leave.get_status_display }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="ss-muted">No leave requests yet.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    {% else %}
+    <div class="ss-empty">
+        <h3>No employee profile linked</h3>
+        <p>Contact HR to link your account to an employee record.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Leave Requests - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/attendance.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="attendance-page page-shell attendance-subpage">
+
+    <nav class="att-breadcrumb">
+        <a href="{% url 'attendance:dashboard' %}">Attendance</a>
+        <span>/</span>
+        <span>Leave requests</span>
+    </nav>
+
+    <header class="att-page-header">
+        <div class="att-page-header-main">
+            <h1>Leave requests</h1>
+            <p class="att-page-subtitle">Track and manage time-off requests</p>
+        </div>
+        <div class="att-page-header-actions">
+            <a href="{% url 'attendance:leave_request' %}" class="btn btn-primary btn-sm">New request</a>
+        </div>
+    </header>
+
+    <div class="att-section">
+        <div class="att-section-body att-section-body-flush">
+            <div class="table-responsive">
+                <table class="data-table att-table">
+                    <thead>
+                        <tr>
+                            {% if can_manage %}<th>Employee</th>{% endif %}
+                            <th>Type</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Days</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in leaves %}
+                        <tr>
+                            {% if can_manage %}<td>{{ leave.employee.full_name }}</td>{% endif %}
+                            <td>{{ leave.leave_type.name }}</td>
+                            <td>{{ leave.start_date|date:"M d, Y" }}</td>
+                            <td>{{ leave.end_date|date:"M d, Y" }}</td>
+                            <td>{{ leave.total_days }}</td>
+                            <td><span class="badge badge-{{ leave.status }}">{{ leave.get_status_display }}</span></td>
+                            <td class="actions-cell">
+                                {% if can_manage and leave.status == 'pending' %}
+                                <form action="{% url 'attendance:leave_review' leave.pk %}" method="post" class="inline-form att-review-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="approved">
+                                    <button type="submit" class="btn btn-sm btn-primary">Approve</button>
+                                </form>
+                                <form action="{% url 'attendance:leave_review' leave.pk %}" method="post" class="inline-form att-review-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="rejected">
+                                    <button type="submit" class="btn btn-sm btn-outline">Reject</button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{% if can_manage %}7{% else %}6{% endif %}">
+                                <div class="att-empty-inline">
+                                    <p>No leave requests yet. Submit a request when you need time off.</p>
+                                    <a href="{% url 'attendance:leave_request' %}" class="btn btn-primary btn-sm">New request</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Request Leave - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/attendance.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="attendance-page page-shell attendance-subpage attendance-form-page">
+
+    <nav class="att-breadcrumb">
+        <a href="{% url 'attendance:dashboard' %}">Attendance</a>
+        <span>/</span>
+        <a href="{% url 'attendance:leave_list' %}">Leave requests</a>
+        <span>/</span>
+        <span>New request</span>
+    </nav>
+
+    <header class="att-page-header">
+        <div class="att-page-header-main">
+            <h1>Request leave</h1>
+            <p class="att-page-subtitle">Submit a time-off request for HR review</p>
+        </div>
+    </header>
+
+    <div class="att-section att-form-card">
+        <div class="att-section-body">
+            <form method="post" class="form-grid att-form" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                <div class="form-error form-group-full" role="alert">{{ form.non_field_errors.0 }}</div>
+                {% endif %}
+                {% for field in form %}
+                <div class="form-group {% if field.name == 'reason' %}form-group-full{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                    {{ field }}
+                    {% if field.help_text %}<span class="form-help">{{ field.help_text }}</span>{% endif %}
+                    {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                </div>
+                {% endfor %}
+                <div class="form-actions form-group-full">
+                    <button type="submit" class="btn btn-primary">Submit request</button>
+                    <a href="{% url 'attendance:leave_list' %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

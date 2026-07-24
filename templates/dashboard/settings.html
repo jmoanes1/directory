@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Settings - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="settings-page page-shell">
+    <header class="settings-page-header">
+        <div class="settings-page-header-main">
+            <div class="settings-profile-row">
+                {% if user.avatar %}
+                {% include "includes/avatar.html" with css_class="avatar-profile" photo_url=user.avatar.url initials=user.initials alt=user.get_full_name %}
+                {% else %}
+                {% include "includes/avatar.html" with css_class="avatar-profile" initials=user.initials %}
+                {% endif %}
+                <div>
+                    <h1>Settings</h1>
+                    <p class="settings-page-subtitle">{{ user.get_full_name|default:user.username }} · {{ user.email }}</p>
+                    <div class="settings-meta-tags">
+                        <span>{{ user.get_role_display }}</span>
+                        {% if user.employee_profile %}
+                        <span>{{ user.employee_profile.employee_id }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="settings-page-header-actions">
+            <a href="{% url 'accounts:profile' %}" class="btn btn-primary btn-sm">Edit profile</a>
+            <a href="{% url 'dashboard:home' %}" class="btn btn-outline btn-sm">Dashboard</a>
+        </div>
+    </header>
+
+    <div class="settings-layout">
+        <nav class="settings-nav" aria-label="Settings sections">
+            <span class="settings-nav-label">Sections</span>
+            <a href="#appearance" class="settings-nav-link is-active" data-settings-nav="appearance">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                Appearance
+            </a>
+            <a href="#account" class="settings-nav-link" data-settings-nav="account">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Account
+            </a>
+            <a href="#workspace" class="settings-nav-link" data-settings-nav="workspace">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Workspace
+            </a>
+            <a href="#data" class="settings-nav-link" data-settings-nav="data">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15h6"/></svg>
+                Data & Export
+            </a>
+            {% if user.can_manage_users %}
+            <a href="#admin" class="settings-nav-link" data-settings-nav="admin">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2M12 9v2M5 12h14M12 22a10 10 0 100-20 10 10 0 000 20z"/></svg>
+                Administration
+            </a>
+            {% endif %}
+        </nav>
+
+        <div class="settings-content">
+            <section class="settings-section" id="appearance">
+                <div class="settings-section-header">
+                    <div>
+                        <h2>Appearance</h2>
+                        <p>Customize how Employee Directory looks on your device</p>
+                    </div>
+                </div>
+                <div class="settings-section-body">
+                    <div class="settings-row">
+                        <div class="settings-row-copy">
+                            <strong>Color theme</strong>
+                            <span>Choose light or dark mode. Your preference is saved on this browser.</span>
+                        </div>
+                    </div>
+                    <div class="settings-theme-grid" role="radiogroup" aria-label="Color theme">
+                        <button type="button" class="settings-theme-option" data-theme-option="light" aria-pressed="false">
+                            <div class="settings-theme-preview settings-theme-preview--light" aria-hidden="true">
+                                <div class="settings-theme-preview-sidebar"></div>
+                                <div class="settings-theme-preview-main">
+                                    <div class="settings-theme-preview-bar"></div>
+                                    <div class="settings-theme-preview-line"></div>
+                                    <div class="settings-theme-preview-line short"></div>
+                                </div>
+                            </div>
+                            <span class="settings-theme-label">
+                                Light
+                                <span class="settings-theme-check" aria-hidden="true">✓</span>
+                            </span>
+                        </button>
+                        <button type="button" class="settings-theme-option" data-theme-option="dark" aria-pressed="false">
+                            <div class="settings-theme-preview settings-theme-preview--dark" aria-hidden="true">
+                                <div class="settings-theme-preview-sidebar"></div>
+                                <div class="settings-theme-preview-main">
+                                    <div class="settings-theme-preview-bar"></div>
+                                    <div class="settings-theme-preview-line"></div>
+                                    <div class="settings-theme-preview-line short"></div>
+                                </div>
+                            </div>
+                            <span class="settings-theme-label">
+                                Dark
+                                <span class="settings-theme-check" aria-hidden="true">✓</span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section" id="account">
+                <div class="settings-section-header">
+                    <div>
+                        <h2>Account & security</h2>
+                        <p>Manage your profile, credentials, and linked employee record</p>
+                    </div>
+                </div>
+                <div class="settings-section-body">
+                    <div class="settings-row">
+                        <div class="settings-row-copy">
+                            <strong>Profile information</strong>
+                            <span>Update your name, email, phone, and profile photo</span>
+                        </div>
+                        <div class="settings-row-action">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline btn-sm">Edit Profile</a>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-copy">
+                            <strong>Password</strong>
+                            <span>Change your login password for this account</span>
+                        </div>
+                        <div class="settings-row-action">
+                            <a href="{% url 'accounts:change_password' %}" class="btn btn-outline btn-sm">Change Password</a>
+                        </div>
+                    </div>
+                    {% if user.employee_profile %}
+                    <div class="settings-row">
+                        <div class="settings-row-copy">
+                            <strong>Employee record</strong>
+                            <span>View your directory profile — {{ user.employee_profile.full_name }}</span>
+                        </div>
+                        <div class="settings-row-action">
+                            <a href="{% url 'employees:detail' user.employee_profile.pk %}" class="btn btn-outline btn-sm">View Profile</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="settings-info-strip">
+                        Signed in as <strong>@{{ user.username }}</strong>
+                        · Member since {{ user.date_joined|date:"M d, Y" }}
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section" id="workspace">
+                <div class="settings-section-header">
+                    <div>
+                        <h2>Workspace tools</h2>
+                        <p>Shortcuts to frequently used features</p>
+                    </div>
+                </div>
+                <div class="settings-section-body">
+                    <div class="settings-tiles">
+                        <a href="{% url 'employees:ai_search' %}" class="settings-tile">
+                            <strong>AI employee search</strong>
+                            <span>Ask natural-language questions about your team</span>
+                        </a>
+                        <a href="{% url 'employees:org_chart' %}" class="settings-tile">
+                            <strong>Organization chart</strong>
+                            <span>Explore reporting hierarchy interactively</span>
+                        </a>
+                        <a href="{% url 'chat:home' %}" class="settings-tile">
+                            <strong>Directory chat</strong>
+                            <span>Message colleagues and the directory assistant</span>
+                        </a>
+                        <a href="{% url 'portal:home' %}" class="settings-tile">
+                            <strong>Employee portal</strong>
+                            <span>Self-service hub for documents and requests</span>
+                        </a>
+                        <a href="{% url 'attendance:dashboard' %}" class="settings-tile">
+                            <strong>Attendance</strong>
+                            <span>Time in, breaks, and leave balances</span>
+                        </a>
+                        <a href="{% url 'notifications:list' %}" class="settings-tile">
+                            <strong>Notifications</strong>
+                            <span>View alerts and system updates</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section" id="data">
+                <div class="settings-section-header">
+                    <div>
+                        <h2>Data & export</h2>
+                        <p>Download or print employee directory data</p>
+                    </div>
+                </div>
+                <div class="settings-section-body">
+                    {% if user.can_manage_employees %}
+                    <div class="settings-tiles">
+                        <a href="{% url 'employees:export_excel' %}" class="settings-tile">
+                            <span class="settings-tile-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+                            </span>
+                            <strong>Export Excel</strong>
+                            <span>Download full employee list as spreadsheet</span>
+                        </a>
+                        <a href="{% url 'employees:export_pdf' %}" class="settings-tile">
+                            <span class="settings-tile-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15h6"/></svg>
+                            </span>
+                            <strong>Export PDF</strong>
+                            <span>Generate a printable PDF directory</span>
+                        </a>
+                        <a href="{% url 'employees:print' %}" class="settings-tile" target="_blank" rel="noopener">
+                            <span class="settings-tile-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+                            </span>
+                            <strong>Print directory</strong>
+                            <span>Open a print-friendly employee list</span>
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="settings-info-strip">
+                        Export tools are available to HR managers and administrators.
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            {% if user.can_manage_users %}
+            <section class="settings-section" id="admin">
+                <div class="settings-section-header">
+                    <div>
+                        <h2>Administration</h2>
+                        <p>User accounts and system access control</p>
+                    </div>
+                </div>
+                <div class="settings-section-body">
+                    <div class="settings-row">
+                        <div class="settings-row-copy">
+                            <strong>Employee accounts</strong>
+                            <span>Create, edit, reset passwords, and manage login access</span>
+                        </div>
+                        <div class="settings-row-action">
+                            <a href="{% url 'accounts:employee_account_list' %}" class="btn btn-primary btn-sm">Manage Accounts</a>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-copy">
+                            <strong>User management</strong>
+                            <span>View all accounts, roles, and registration status</span>
+                        </div>
+                        <div class="settings-row-action">
+                            <a href="{% url 'accounts:user_list' %}" class="btn btn-outline btn-sm">Manage Users</a>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-copy">
+                            <strong>Audit logs</strong>
+                            <span>Review system activity and change history</span>
+                        </div>
+                        <div class="settings-row-action">
+                            <a href="{% url 'employees:audit_log' %}" class="btn btn-outline btn-sm">View Logs</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const navLinks = document.querySelectorAll('[data-settings-nav]');
+    const sections = document.querySelectorAll('.settings-section');
+
+    function setActiveNav(id) {
+        navLinks.forEach((link) => {
+            link.classList.toggle('is-active', link.dataset.settingsNav === id);
+        });
+    }
+
+    navLinks.forEach((link) => {
+        link.addEventListener('click', () => setActiveNav(link.dataset.settingsNav));
+    });
+
+    if (sections.length && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    setActiveNav(entry.target.id);
+                }
+            });
+        }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+
+        sections.forEach((section) => observer.observe(section));
+    }
+
+    document.querySelectorAll('[data-theme-option]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            if (window.ThemeManager) {
+                window.ThemeManager.set(btn.dataset.themeOption);
+            }
+        });
+    });
+})();
+</script>
+{% endblock %}

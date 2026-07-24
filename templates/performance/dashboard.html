@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Performance - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/performance.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="perf-page page-shell">
+
+    <header class="perf-page-header">
+        <div class="perf-page-header-main">
+            <h1>Performance</h1>
+            <p class="perf-page-subtitle">Reviews, goals, and employee development</p>
+        </div>
+        <div class="perf-page-header-actions">
+            <a href="{% url 'performance:goals' %}" class="btn btn-outline btn-sm">All goals</a>
+            {% if can_manage %}
+            <a href="{% url 'performance:review_create' %}" class="btn btn-primary btn-sm">New review</a>
+            <a href="{% url 'performance:goal_create' %}" class="btn btn-outline btn-sm">New goal</a>
+            {% elif employee %}
+            <a href="{% url 'performance:goal_create' %}" class="btn btn-primary btn-sm">My goal</a>
+            {% endif %}
+        </div>
+    </header>
+
+    {% if stats %}
+    <section class="perf-stats" aria-label="Performance summary">
+        <article class="perf-stat">
+            <span class="perf-stat-value">{{ stats.total_reviews }}</span>
+            <span class="perf-stat-label">Total reviews</span>
+        </article>
+        <article class="perf-stat">
+            <span class="perf-stat-value">{{ stats.active_goals }}</span>
+            <span class="perf-stat-label">Active goals</span>
+        </article>
+        <article class="perf-stat">
+            <span class="perf-stat-value">{{ stats.avg_rating }}</span>
+            <span class="perf-stat-label">Average rating</span>
+        </article>
+        <article class="perf-stat">
+            <span class="perf-stat-value">{{ stats.employees }}</span>
+            <span class="perf-stat-label">Employees</span>
+        </article>
+    </section>
+    {% endif %}
+
+    <div class="perf-panels">
+        <section class="perf-section">
+            <div class="perf-section-header">
+                <h2>Recent reviews</h2>
+                {% if can_manage %}<a href="{% url 'performance:review_create' %}" class="btn btn-sm btn-outline">Add</a>{% endif %}
+            </div>
+            <div class="perf-section-body">
+                {% if reviews %}
+                <ul class="perf-list">
+                    {% for review in reviews %}
+                    <li class="perf-list-item">
+                        <div class="perf-list-main">
+                            <a href="{% url 'performance:review_detail' review.pk %}" class="perf-list-title">{{ review.employee.full_name }}</a>
+                            <span class="perf-list-meta">{{ review.review_period }} · {{ review.get_status_display }}</span>
+                        </div>
+                        <div class="perf-list-side">
+                            <span class="perf-rating">{{ review.overall_rating }}/5</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="perf-empty">
+                    <h3>No reviews yet</h3>
+                    <p>Reviews will appear here once performance cycles are created.</p>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="perf-section">
+            <div class="perf-section-header">
+                <h2>{% if can_manage %}Active goals{% else %}My goals{% endif %}</h2>
+                <a href="{% url 'performance:goals' %}" class="btn btn-sm btn-outline">View all</a>
+            </div>
+            <div class="perf-section-body">
+                {% if goals %}
+                <ul class="perf-list">
+                    {% for goal in goals %}
+                    <li class="perf-list-item">
+                        <div class="perf-list-main">
+                            <span class="perf-list-title">{{ goal.title }}</span>
+                            <span class="perf-list-meta">
+                                {% if can_manage %}{{ goal.employee.full_name }} · {% endif %}{{ goal.get_status_display }}
+                            </span>
+                            <div class="goal-progress-bar"><div class="goal-progress-fill" style="width:{{ goal.progress }}%"></div></div>
+                        </div>
+                        <div class="perf-list-side">{{ goal.progress }}%</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="perf-empty">
+                    <h3>No goals yet</h3>
+                    <p>Create goals to track progress and development plans.</p>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+</div>
+{% endblock %}

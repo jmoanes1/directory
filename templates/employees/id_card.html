@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}ID Card - {{ employee.full_name }}{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="{% url 'employees:list' %}">Employees</a>
+    <span class="breadcrumb-sep">/</span>
+    <a href="{% url 'employees:detail' employee.pk %}">{{ employee.full_name }}</a>
+    <span class="breadcrumb-sep">/</span>
+    <span>ID Card</span>
+</nav>
+
+<div class="page-header flex-between">
+    <div>
+        <span class="page-header-badge">🪪 ID Card</span>
+        <h1>Employee ID Card</h1>
+        <p class="text-muted">{{ employee.employee_id }} · {{ employee.department.name }}</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'employees:id_card_download' employee.pk %}" class="btn btn-primary">Download PDF</a>
+        <a href="{% url 'employees:detail' employee.pk %}" class="btn btn-outline">Back to Profile</a>
+    </div>
+</div>
+
+<div class="id-card-preview-wrap">
+    <div class="id-card-preview">
+        <div class="id-card-header-bar">EMPLOYEE DIRECTORY</div>
+        <div class="id-card-body">
+            <div class="id-card-photo">
+                {% if employee.profile_photo %}
+                <img src="{{ employee.profile_photo.url }}" alt="{{ employee.full_name }}">
+                {% else %}
+                <span class="id-card-initials">{{ employee.initials }}</span>
+                {% endif %}
+            </div>
+            <div class="id-card-info">
+                <h2>{{ employee.full_name }}</h2>
+                <p>{{ employee.position.title }}</p>
+                <p>{{ employee.department.name }}</p>
+                <p class="id-card-id">{{ employee.employee_id }}</p>
+                <p>{{ employee.email }}</p>
+            </div>
+            <div class="id-card-qr">
+                <img src="{% url 'employees:qr' employee.pk %}" alt="QR Code">
+            </div>
+        </div>
+        <div class="id-card-footer">Hired {{ employee.date_hired|date:"F Y" }} · Valid company identification</div>
+    </div>
+</div>
+{% endblock %}

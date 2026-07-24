@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ job.title }} - Recruitment{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/recruitment.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="rec-page page-shell">
+
+    <nav class="rec-breadcrumb">
+        <a href="{% url 'recruitment:job_list' %}">Recruitment</a>
+        <span>/</span>
+        <span>{{ job.title }}</span>
+    </nav>
+
+    <header class="rec-page-header">
+        <div class="rec-page-header-main">
+            <h1>{{ job.title }}</h1>
+            <p class="rec-page-subtitle">{{ job.department.name }}{% if job.position %} · {{ job.position.title }}{% endif %} · {{ job.get_employment_type_display }}</p>
+        </div>
+        <div class="rec-page-header-actions">
+            {% if job.status == 'open' %}
+            <a href="{% url 'recruitment:job_apply' job.pk %}" class="btn btn-primary btn-sm">Apply</a>
+            {% endif %}
+            {% if can_manage %}
+            <a href="{% url 'recruitment:job_edit' job.pk %}" class="btn btn-outline btn-sm">Edit</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="rec-panels">
+        <section class="rec-section rec-section--full">
+            <div class="rec-section-header"><h2>Description</h2></div>
+            <div class="rec-section-body">{{ job.description|linebreaksbr }}</div>
+        </section>
+
+        {% if job.requirements %}
+        <section class="rec-section rec-section--full">
+            <div class="rec-section-header"><h2>Requirements</h2></div>
+            <div class="rec-section-body">{{ job.requirements|linebreaksbr }}</div>
+        </section>
+        {% endif %}
+
+        <section class="rec-section">
+            <div class="rec-section-header"><h2>Details</h2></div>
+            <div class="rec-section-body">
+                <dl class="rec-detail-list">
+                    <div><dt>Status</dt><dd>{{ job.get_status_display }}</dd></div>
+                    {% if job.location %}<div><dt>Location</dt><dd>{{ job.location }}</dd></div>{% endif %}
+                    {% if job.salary_range %}<div><dt>Salary</dt><dd>{{ job.salary_range }}</dd></div>{% endif %}
+                    <div><dt>Opens</dt><dd>{{ job.opens_at|date:"M d, Y" }}</dd></div>
+                    {% if job.closes_at %}<div><dt>Closes</dt><dd>{{ job.closes_at|date:"M d, Y" }}</dd></div>{% endif %}
+                    <div><dt>Applications</dt><dd>{{ job.application_count }}</dd></div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+</div>
+{% endblock %}

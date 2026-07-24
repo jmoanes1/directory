@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% load static attendance_extras %}
+
+{% block title %}Attendance & Leave - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/attendance.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="attendance-page page-shell">
+
+    <header class="att-page-header">
+        <div class="att-page-header-main">
+            <h1>Attendance & leave</h1>
+            <p class="att-page-subtitle">Punch time is recorded when you click each action · {{ timezone_label }}</p>
+        </div>
+        <div class="att-page-header-actions">
+            <a href="{% url 'attendance:timesheet' %}" class="btn btn-primary btn-sm">My timesheet</a>
+            <a href="{% url 'attendance:leave_request' %}" class="btn btn-outline btn-sm">Request leave</a>
+            <a href="{% url 'attendance:leave_list' %}" class="btn btn-outline btn-sm">Leave history</a>
+            {% if can_manage %}
+            <a href="{% url 'attendance:report' %}" class="btn btn-outline btn-sm">Reports</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <section class="att-stats" aria-label="Today's summary">
+        <article class="att-stat">
+            <span class="att-stat-value">{{ present_today }}</span>
+            <span class="att-stat-label">Present today</span>
+        </article>
+        <article class="att-stat">
+            <span class="att-stat-value">{{ on_leave_today }}</span>
+            <span class="att-stat-label">On leave</span>
+        </article>
+        <article class="att-stat">
+            <span class="att-stat-value">{{ pending_leaves }}</span>
+            <span class="att-stat-label">Pending requests</span>
+        </article>
+    </section>
+
+    {% if employee and leave_balances %}
+    <section class="att-section">
+        <div class="att-section-header">
+            <h2>Leave balances {% now "Y" %}</h2>
+        </div>
+        <div class="att-section-body">
+            <div class="leave-balance-grid">
+                {% for b in leave_balances %}
+                <div class="leave-balance-item">
+                    <span class="leave-balance-type" style="border-left-color:{{ b.leave_type.color }}">{{ b.leave_type.name }}</span>
+                    <span class="leave-balance-meta"><strong>{{ b.remaining }}</strong> remaining · {{ b.used }}/{{ b.entitled }} used</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if employee %}
+    <div class="att-clock-bar">
+        <div class="att-clock-item">
+            <span class="att-clock-label">Today</span>
+            <strong>{% now "l, F j, Y" %}</strong>
+        </div>
+        <div class="att-clock-item att-clock-item-center">
+            <span class="att-clock-label">Next punch</span>
+            <strong id="punchPreviewTime">{{ current_local_time|attendance_time }}</strong>
+        </div>
+        <div class="att-clock-item att-clock-item-end">
+            <span class="att-clock-label">Local time</span>
+            <strong id="attendanceClock">{{ current_local_time|attendance_time }}</strong>
+        </div>
+    </div>
+
+    <section class="att-section att-punch-section">
+        <div class="att-section-header">
+            <div>
+                <h2>Today's attendance</h2>
+                <p class="att-section-sub">{{ employee.full_name }}</p>
+            </div>
+            {% if today_record %}
+            <span class="badge {% if today_record.is_wfh %}badge-outline{% else %}badge-active{% endif %}">
+                {% if today_record.is_wfh %}WFH{% else %}Office{% endif %}
+            </span>
+            {% endif %}
+        </div>
+        <div class="att-section-body att-punch-body">
+            {% if today_record and today_record.is_day_complete %}
+            <p class="att-help-text">Day complete · {{ today_record.hours_worked_display }} total</p>
+            {% else %}
+            <p class="att-help-text">Choose work mode, then punch in order. Time is saved when you click each button.</p>
+            {% endif %}
+
+            {% if not today_record or not today_record.is_day_complete %}
+            <div class="work-mode-toggle" role="group" aria-label="Work mode">
+                <span class="work-mode-label">Work mode</span>
+                <div class="work-mode-buttons">
+                    <button type="button" class="work-mode-btn {% if selected_work_mode == 'office' %}is-active{% endif %}" data-work-mode="office" aria-pressed="{% if selected_work_mode == 'office' %}true{% else %}false{% endif %}">Office</button>
+                    <button type="button" class="work-mode-btn {% if selected_work_mode == 'wfh' %}is-active{% endif %}" data-work-mode="wfh" aria-pressed="{% if selected_work_mode == 'wfh' %}true{% else %}false{% endif %}">WFH</button>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="attendance-timeline">
+                {% for action in punch_actions %}
+                <div class="attendance-slot {% if action.is_done %}is-done{% endif %} {% if action.is_next %}is-next{% endif %}">
+                    <span class="attendance-slot-label">{{ action.label }}</span>
+                    <span class="attendance-slot-time" data-slot="{{ action.key }}">
+                        {% if action.time %}{{ action.time|attendance_time }}{% else %}—{% endif %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if today_record and today_record.time_in_morning %}
+            <div class="timesheet-day-summary">
+                <span>Mode: <strong>{{ today_record.work_mode_display }}</strong></span>
+                <span>Morning: <strong>{{ today_record.morning_hours_display }}</strong></span>
+                <span>Break: <strong>{{ today_record.break_duration_display }}</strong></span>
+                <span>Afternoon: <strong>{{ today_record.afternoon_hours_display }}</strong></span>
+                <span>Total: <strong>{{ today_record.hours_worked_display }}</strong></span>
+            </div>
+            {% endif %}
+
+            <div class="attendance-actions">
+                {% for action in punch_actions %}
+                    {% if action.is_next %}
+                    <form action="{% url 'attendance:punch' %}" method="post" class="attendance-punch-form inline-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="{{ action.key }}">
+                        <input type="hidden" name="client_time" class="punch-client-time" value="">
+                        <input type="hidden" name="work_mode" class="punch-work-mode" value="{{ selected_work_mode }}">
+                        <button type="submit" class="btn {% if action.key == 'time_in_morning' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
+                            {{ action.label }}
+                        </button>
+                    </form>
+                    {% endif %}
+                {% endfor %}
+                {% if today_record and today_record.is_day_complete %}
+                <span class="badge badge-present">Completed</span>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="att-section">
+        <div class="att-section-header">
+            <h2>Recent attendance</h2>
+            <a href="{% url 'attendance:timesheet' %}" class="btn btn-sm btn-outline">View timesheet</a>
+        </div>
+        <div class="att-section-body att-section-body-flush">
+            {% if recent_records %}
+            <div class="table-responsive">
+                <table class="data-table att-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Mode</th>
+                            <th>Morning in</th>
+                            <th>Lunch out</th>
+                            <th>Noon in</th>
+                            <th>Afternoon out</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rec in recent_records %}
+                        <tr>
+                            <td>{{ rec.date|date:"M d" }}</td>
+                            <td>{% if rec.is_wfh %}WFH{% else %}Office{% endif %}</td>
+                            <td>{{ rec.time_in_morning|attendance_time }}</td>
+                            <td>{{ rec.break_lunch|attendance_time }}</td>
+                            <td>{{ rec.time_in_noon|attendance_time }}</td>
+                            <td>{{ rec.time_out_afternoon|attendance_time }}</td>
+                            <td>{{ rec.hours_worked_display }}</td>
+                            <td><span class="badge badge-{{ rec.status }}">{{ rec.get_status_display }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="att-empty-inline">
+                <p>No records yet. Record <strong>Time in (morning)</strong> to start tracking.</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {% else %}
+    <div class="att-empty">
+        <h3>No employee profile linked</h3>
+        <p>Contact HR to link your account for attendance tracking.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if employee %}
+<script>
+    document.body.dataset.serverTimestamp = "{{ server_timestamp_ms }}";
+    document.body.dataset.workMode = "{{ selected_work_mode }}";
+</script>
+<script src="{% static 'js/attendance.js' %}"></script>
+{% endif %}
+{% endblock %}

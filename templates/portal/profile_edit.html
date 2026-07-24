@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Personal Info - Self-Service{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/portal.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ss-page page-shell ss-page-narrow">
+
+    <nav class="ss-breadcrumb">
+        <a href="{% url 'portal:home' %}">Self-service</a>
+        <span>/</span>
+        <span>Personal info</span>
+    </nav>
+
+    <header class="ss-page-header">
+        <div class="ss-page-header-main">
+            <h1>Personal info</h1>
+            <p class="ss-page-subtitle">Profile completion: {{ profile_completion }}%</p>
+        </div>
+    </header>
+
+    <div class="ss-section ss-form-card">
+        <div class="ss-section-body">
+            <form method="post" class="form-grid ss-form" novalidate>
+                {% csrf_token %}
+
+                <h3 class="ss-form-section-title">Contact</h3>
+                {% for field in form %}
+                {% if field.name in "phone_number,address,bio" %}
+                <div class="form-group {% if field.name in 'address,bio' %}form-group-full{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                <h3 class="ss-form-section-title">Emergency contact</h3>
+                {% for field in form %}
+                {% if "emergency" in field.name %}
+                <div class="form-group {% if field.name == 'emergency_contact' %}form-group-full{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                <h3 class="ss-form-section-title">Work preferences</h3>
+                {% for field in form %}
+                {% if field.name in "work_location,availability_status" %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                <h3 class="ss-form-section-title">Social links</h3>
+                {% for field in form %}
+                {% if field.name in "linkedin_url,github_url,twitter_url,website_url" %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                <div class="form-actions form-group-full">
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <a href="{% url 'portal:home' %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

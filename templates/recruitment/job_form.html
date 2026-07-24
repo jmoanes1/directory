@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Recruitment{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/recruitment.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="rec-page page-shell rec-page-narrow">
+
+    <nav class="rec-breadcrumb">
+        <a href="{% url 'recruitment:job_list' %}">Recruitment</a>
+        <span>/</span>
+        <span>{{ title }}</span>
+    </nav>
+
+    <header class="rec-page-header">
+        <div class="rec-page-header-main">
+            <h1>{{ title }}</h1>
+        </div>
+    </header>
+
+    <section class="rec-section rec-form-section">
+        <div class="rec-section-body">
+            <form method="post" class="form-grid" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group {% if field.name in 'description,requirements' %}form-group-full{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                </div>
+                {% endfor %}
+                <div class="form-actions form-group-full">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a href="{% url 'recruitment:job_list' %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

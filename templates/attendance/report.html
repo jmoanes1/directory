@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static attendance_extras %}
+
+{% block title %}Attendance Report - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/attendance.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="attendance-page page-shell attendance-subpage">
+
+    <nav class="att-breadcrumb">
+        <a href="{% url 'attendance:dashboard' %}">Attendance</a>
+        <span>/</span>
+        <span>Report</span>
+    </nav>
+
+    <header class="att-page-header">
+        <div class="att-page-header-main">
+            <h1>Attendance report</h1>
+            <p class="att-page-subtitle">{{ month_start|date:"F Y" }}</p>
+        </div>
+        <div class="att-page-header-actions">
+            <a href="{% url 'attendance:dashboard' %}" class="btn btn-outline btn-sm">Back</a>
+        </div>
+    </header>
+
+    <section class="att-stats">
+        {% for item in summary %}
+        <article class="att-stat">
+            <span class="att-stat-value">{{ item.count }}</span>
+            <span class="att-stat-label">{{ item.status|title }}</span>
+        </article>
+        {% endfor %}
+    </section>
+
+    <section class="att-section">
+        <div class="att-section-body att-section-body-flush">
+            <div class="table-responsive">
+                <table class="data-table att-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Mode</th>
+                            <th>Date</th>
+                            <th>Morning in</th>
+                            <th>Lunch out</th>
+                            <th>Noon in</th>
+                            <th>Afternoon out</th>
+                            <th>Break</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rec in records %}
+                        <tr>
+                            <td>{{ rec.employee.full_name }}</td>
+                            <td>{% if rec.is_wfh %}WFH{% else %}Office{% endif %}</td>
+                            <td>{{ rec.date|date:"M d" }}</td>
+                            <td>{{ rec.time_in_morning|attendance_time }}</td>
+                            <td>{{ rec.break_lunch|attendance_time }}</td>
+                            <td>{{ rec.time_in_noon|attendance_time }}</td>
+                            <td>{{ rec.time_out_afternoon|attendance_time }}</td>
+                            <td>{{ rec.break_duration_display }}</td>
+                            <td>{{ rec.hours_worked_display }}</td>
+                            <td><span class="badge badge-{{ rec.status }}">{{ rec.get_status_display }}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10">
+                                <div class="att-empty-inline">
+                                    <p>No attendance records for this period.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

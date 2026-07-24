@@ -1,0 +1,72 @@
+/* ============================================
+   UI Enhancements — minimal safe overrides
+   ============================================ */
+
+/* Page headers */
+.page-header h1 {
+    color: var(--text-primary);
+    background: none;
+    -webkit-text-fill-color: unset;
+}
+
+/* Cards */
+.card-header {
+    background: var(--bg-surface);
+}
+
+/* Buttons — defer to theme */
+.btn-primary {
+    box-shadow: none;
+}
+.btn-primary:hover {
+    box-shadow: none;
+}
+
+/* Forms */
+.form-control {
+    box-shadow: none;
+    border: 1px solid var(--border-color);
+}
+.form-group label {
+    font-size: 0.8125rem;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* Tables */
+.data-table tbody tr:nth-child(even) td {
+    background: var(--bg-body);
+}
+
+/* Dropdowns */
+.notification-dropdown,
+.user-dropdown {
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+}
+.notification-unread .notification-item-btn {
+    border-left: 2px solid var(--color-primary);
+    background: var(--color-primary-light);
+}
+
+.dropdown-logout {
+    color: var(--color-danger) !important;
+}
+.dropdown-logout:hover {
+    background: var(--color-danger-light) !important;
+}
+
+/* Hero buttons need explicit display when combined with .btn */
+.btn.btn-hero-primary,
+.btn.btn-hero-ghost {
+    display: inline-flex;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+    }
+}

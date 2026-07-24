@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Audit Logs - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/system-pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sys-page page-shell">
+
+    <header class="sys-page-header">
+        <div class="sys-page-header-main">
+            <h1>Audit logs</h1>
+            <p class="sys-page-subtitle">System-wide activity trail for compliance and monitoring</p>
+        </div>
+    </header>
+
+    <form method="get" class="sys-filters sys-filters--inline">
+        <input type="search" name="q" value="{{ q }}" placeholder="Search description, user…" class="form-control" aria-label="Search logs">
+        <select name="action" class="form-control form-select" aria-label="Filter by action">
+            <option value="">All actions</option>
+            {% for value, label in action_choices %}
+            <option value="{{ value }}" {% if action == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <select name="model" class="form-control form-select" aria-label="Filter by model">
+            <option value="">All models</option>
+            {% for name in model_names %}
+            <option value="{{ name }}" {% if model_name == name %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+        <a href="{% url 'employees:audit_log' %}" class="btn btn-outline btn-sm">Reset</a>
+    </form>
+
+    <div class="sys-section sys-table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>When</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Description</th>
+                    <th>Model</th>
+                    <th>IP</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td class="text-muted text-sm">{{ log.created_at|date:"M d, Y H:i" }}</td>
+                    <td>{{ log.user.username|default:"System" }}</td>
+                    <td><span class="badge badge-outline">{{ log.get_action_display }}</span></td>
+                    <td>{{ log.description }}</td>
+                    <td class="text-muted text-sm">{{ log.model_name|default:"—" }}</td>
+                    <td class="text-muted text-sm">{{ log.ip_address|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted" style="padding:2rem">No audit entries match your filters.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% if messages %}
+<div class="messages-container" role="region" aria-label="Notifications">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" data-auto-dismiss="6000" role="alert">
+        <span class="alert-icon" aria-hidden="true">
+            {% if 'success' in message.tags %}✓{% elif 'error' in message.tags or 'danger' in message.tags %}!{% elif 'warning' in message.tags %}⚠{% else %}ℹ{% endif %}
+        </span>
+        <span class="alert-body">{{ message }}</span>
+        <button type="button" class="alert-close" onclick="this.closest('.alert').remove()" aria-label="Dismiss message">&times;</button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

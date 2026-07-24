@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Skills Matrix - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/skills-matrix.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="skills-matrix-page page-shell">
+
+    <header class="sm-page-header">
+        <div class="sm-page-header-main">
+            <h1>Skills matrix</h1>
+            <p class="sm-page-subtitle">
+                {% if matrix_rows and skills %}
+                {{ matrix_rows|length }} employee{{ matrix_rows|length|pluralize }} · {{ skills|length }} skill{{ skills|length|pluralize }}
+                {% else %}
+                Team capabilities and proficiency at a glance
+                {% endif %}
+            </p>
+        </div>
+        {% if can_manage %}
+        <div class="sm-page-header-actions">
+            <a href="{% url 'employees:skill_create' %}" class="btn btn-outline btn-sm">Add skill</a>
+            <a href="{% url 'employees:skill_assign' %}" class="btn btn-primary btn-sm">Assign skill</a>
+        </div>
+        {% endif %}
+    </header>
+
+    <div class="sm-toolbar">
+        <form method="get" class="sm-filters">
+            <label class="sm-filter">
+                <span>Department</span>
+                <select name="department" class="form-control form-select" onchange="this.form.submit()">
+                    <option value="">All departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.pk }}" {% if selected_department == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="sm-filter">
+                <span>Category</span>
+                <select name="category" class="form-control form-select" onchange="this.form.submit()">
+                    <option value="">All categories</option>
+                    {% for val, label in categories %}
+                    <option value="{{ val }}" {% if selected_category == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </form>
+        <div class="sm-legend" aria-label="Proficiency legend">
+            <span class="sm-legend-item"><span class="proficiency-dot proficiency-1"></span> Beginner</span>
+            <span class="sm-legend-item"><span class="proficiency-dot proficiency-2"></span> Intermediate</span>
+            <span class="sm-legend-item"><span class="proficiency-dot proficiency-3"></span> Advanced</span>
+            <span class="sm-legend-item"><span class="proficiency-dot proficiency-4"></span> Expert</span>
+        </div>
+    </div>
+
+    <div class="sm-panel">
+        {% if matrix_rows and skills %}
+        <div class="sm-table-wrap">
+            <table class="data-table skills-matrix">
+                <thead>
+                    <tr>
+                        <th class="sm-sticky-col">Employee</th>
+                        {% for skill in skills %}
+                        <th class="sm-skill-col" title="{{ skill.get_category_display }}">{{ skill.name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in matrix_rows %}
+                    <tr>
+                        <td class="sm-sticky-col">
+                            <a href="{% url 'employees:detail' row.employee.pk %}" class="sm-employee-link">
+                                {% include "includes/avatar.html" with css_class="avatar-sm" initials=row.employee.initials %}
+                                <span>{{ row.employee.full_name }}</span>
+                            </a>
+                        </td>
+                        {% for cell in row.cells %}
+                        <td class="sm-skill-cell">
+                            {% if cell %}
+                            <span class="proficiency-dot proficiency-{{ cell.level }}" title="{{ cell.label }}"></span>
+                            {% else %}
+                            <span class="proficiency-empty" aria-hidden="true">·</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="sm-empty">
+            <h3>No matrix data</h3>
+            <p>Add employees and assign skills to populate the matrix.</p>
+            {% if can_manage %}
+            <a href="{% url 'employees:skill_assign' %}" class="btn btn-primary btn-sm">Assign skill</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

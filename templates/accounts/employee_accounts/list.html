@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Employee Accounts - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/employee-accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ea-page page-shell">
+
+    <header class="ea-page-header">
+        <div class="ea-page-header-main">
+            <h1>Employee accounts</h1>
+            <p class="ea-page-subtitle">Create and manage employee login access</p>
+        </div>
+        <div class="ea-page-header-actions">
+            <a href="{% url 'accounts:employee_account_create' %}" class="btn btn-primary btn-sm">Add employee</a>
+        </div>
+    </header>
+
+    <form method="get" class="ea-filters">
+        <div class="form-group">
+            <label for="q">Search</label>
+            <input type="search" name="q" id="q" class="form-control" value="{{ search }}" placeholder="Name, email, ID, username…">
+        </div>
+        <div class="form-group">
+            <label for="department">Department</label>
+            <select name="department" id="department" class="form-control form-select">
+                <option value="">All departments</option>
+                {% for d in departments %}
+                <option value="{{ d.pk }}" {% if selected_department == d.pk|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="position">Position</label>
+            <select name="position" id="position" class="form-control form-select">
+                <option value="">All positions</option>
+                {% for p in positions %}
+                <option value="{{ p.pk }}" {% if selected_position == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="role">Role</label>
+            <select name="role" id="role" class="form-control form-select">
+                <option value="">All roles</option>
+                <option value="employee" {% if selected_role == "employee" %}selected{% endif %}>Employee</option>
+                <option value="hr_manager" {% if selected_role == "hr_manager" %}selected{% endif %}>HR Manager</option>
+                <option value="super_admin" {% if selected_role == "super_admin" %}selected{% endif %}>Administrator</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select name="status" id="status" class="form-control form-select">
+                <option value="">All statuses</option>
+                <option value="active" {% if selected_status == "active" %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if selected_status == "inactive" %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-outline btn-sm">Filter</button>
+        <a href="{% url 'accounts:employee_account_list' %}" class="btn btn-outline btn-sm">Reset</a>
+    </form>
+
+    <div class="ea-table-section">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Department</th>
+                        <th>Position</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in page_obj %}
+                    <tr>
+                        <td>
+                            <div class="ea-account-user">
+                                {% if emp.profile_photo %}
+                                {% include "includes/avatar.html" with css_class="avatar-sm" photo_url=emp.profile_photo.url initials=emp.initials %}
+                                {% else %}
+                                {% include "includes/avatar.html" with css_class="avatar-sm" initials=emp.initials %}
+                                {% endif %}
+                                <div>
+                                    <strong>{{ emp.full_name }}</strong>
+                                    <span>{{ emp.employee_id }} · {{ emp.email }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ emp.department.name }}</td>
+                        <td>{{ emp.position.title }}</td>
+                        <td>@{{ emp.user.username }}</td>
+                        <td><span class="badge badge-outline">{{ emp.user.get_role_display }}</span></td>
+                        <td>
+                            {% if emp.user.is_active and emp.is_active %}
+                            <span class="badge badge-active">Active</span>
+                            {% else %}
+                            <span class="badge badge-inactive">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="ea-actions-inline">
+                                <a href="{% url 'accounts:employee_account_detail' emp.pk %}" class="btn btn-sm btn-outline">View</a>
+                                <a href="{% url 'accounts:employee_account_edit' emp.pk %}" class="btn btn-sm btn-outline">Edit</a>
+                                {% if emp.user_id and emp.user_id != user.id %}
+                                {% if not emp.user.is_super_admin or user.is_super_admin %}
+                                <button type="button" class="btn btn-sm btn-outline" data-modal="toggle-active"
+                                    data-url="{% url 'accounts:employee_account_toggle_active' emp.pk %}"
+                                    data-name="{{ emp.full_name }}"
+                                    data-action="{% if emp.user.is_active %}deactivate{% else %}activate{% endif %}"
+                                    data-next="{% url 'accounts:employee_account_list' %}">
+                                    {% if emp.user.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline btn-icon-danger" data-modal="delete"
+                                    data-url="{% url 'accounts:employee_account_delete' emp.pk %}"
+                                    data-name="{{ emp.full_name }}"
+                                    title="Delete account" aria-label="Delete {{ emp.full_name }}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6"/></svg>
+                                </button>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="ea-table-empty">No employee accounts found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    {% include "includes/directory_pagination.html" with page_obj=page_obj %}
+    {% endif %}
+
+</div>
+{% endblock %}

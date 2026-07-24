@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/employees.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="employees-page page-shell emp-form-page">
+
+    <nav class="emp-breadcrumb">
+        <a href="{% url 'employees:list' %}">Employees</a>
+        <span>/</span>
+        <span>{{ title }}</span>
+    </nav>
+
+    <header class="emp-page-header">
+        <div class="emp-page-header-main">
+            <h1>{{ title }}</h1>
+            <p class="emp-page-subtitle">{% if employee %}Update employee record details{% else %}Add a new member to the directory{% endif %}</p>
+        </div>
+    </header>
+
+    <div class="emp-form-card">
+        <div class="emp-form-progress" id="employeeFormProgress">
+            <div class="emp-form-progress-meta">
+                <span class="emp-form-progress-label" id="employeeFormProgressLabel">Step 1 of 3</span>
+                <span class="emp-form-progress-percent" id="employeeFormProgressPercent">33%</span>
+            </div>
+            <div class="emp-form-progress-track" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" id="employeeFormProgressBar">
+                <div class="emp-form-progress-fill" id="employeeFormProgressFill" style="width: 33.33%"></div>
+            </div>
+            <ol class="emp-form-progress-steps">
+                <li class="is-active" data-step-marker="1">Personal</li>
+                <li data-step-marker="2">Employment</li>
+                <li data-step-marker="3">Additional</li>
+            </ol>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="emp-form" id="employeeForm" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-error emp-form-alert">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <section class="emp-form-step is-active" data-step="1">
+                <div class="emp-form-step-header">
+                    <h2>Personal information</h2>
+                    <p>Basic identity and contact details</p>
+                </div>
+                <div class="form-grid">
+                    {% for field in form %}
+                    {% if field.name in "first_name,middle_name,last_name,suffix,email,phone_number,date_of_birth,gender,address,profile_photo" %}
+                    <div class="form-group {% if field.name in 'address,profile_photo' %}form-group-full{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                        {{ field }}
+                        {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="emp-form-step" data-step="2" hidden>
+                <div class="emp-form-step-header">
+                    <h2>Employment information</h2>
+                    <p>Department, position, and work details</p>
+                </div>
+                <div class="form-grid">
+                    {% for field in form %}
+                    {% if field.name in "date_hired,department,position,manager,employment_status,employee_type,work_location,availability_status" %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                        {{ field }}
+                        {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="emp-form-step" data-step="3" hidden>
+                <div class="emp-form-step-header">
+                    <h2>Additional information</h2>
+                    <p>Emergency contacts, bio, and social links</p>
+                </div>
+                <div class="form-grid">
+                    {% for field in form %}
+                    {% if field.name in "emergency_contact,emergency_contact_name,emergency_contact_phone,emergency_contact_relationship,bio,linkedin_url,github_url,twitter_url,website_url" %}
+                    <div class="form-group {% if field.name == 'bio' %}form-group-full{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                        {{ field }}
+                        {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </section>
+
+            <div class="emp-form-actions">
+                <div class="emp-form-actions-left">
+                    <a href="{% if employee %}{% url 'employees:detail' employee.pk %}{% else %}{% url 'employees:list' %}{% endif %}" class="btn btn-outline">Cancel</a>
+                    <button type="button" class="btn btn-outline" id="employeeFormBack" hidden>Back</button>
+                </div>
+                <div class="emp-form-actions-right">
+                    <button type="button" class="btn btn-primary" id="employeeFormNext">Next</button>
+                    <button type="submit" class="btn btn-primary" id="employeeFormSubmit" hidden>Save employee</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/employee-form.js' %}"></script>
+{% endblock %}

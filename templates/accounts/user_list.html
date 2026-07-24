@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Users - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/system-pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sys-page page-shell">
+
+    <header class="sys-page-header">
+        <div class="sys-page-header-main">
+            <h1>Users</h1>
+            <p class="sys-page-subtitle">Manage system accounts — deactivate or delete access</p>
+        </div>
+        <div class="sys-page-header-actions">
+            <a href="{% url 'accounts:employee_account_create' %}" class="btn btn-primary btn-sm">Add employee account</a>
+        </div>
+    </header>
+
+    <div class="sys-section sys-table-wrap">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Position</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td>
+                            <div class="sys-user-cell">
+                                {% if u.avatar %}
+                                {% include "includes/avatar.html" with css_class="avatar-sm" photo_url=u.avatar.url initials=u.initials alt=u.get_full_name %}
+                                {% else %}
+                                {% include "includes/avatar.html" with css_class="avatar-sm" initials=u.initials %}
+                                {% endif %}
+                                <div>
+                                    <strong>{{ u.get_full_name|default:u.username }}</strong>
+                                    <span>@{{ u.username }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ u.email }}</td>
+                        <td>
+                            {% if u.employee_profile and u.employee_profile.position %}
+                            {{ u.employee_profile.position.title }}
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge badge-outline">{{ u.get_role_display }}</span></td>
+                        <td>
+                            {% if u.is_active %}
+                            <span class="badge badge-active">Active</span>
+                            {% else %}
+                            <span class="badge badge-inactive">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted">{{ u.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                            {% if u.pk != user.pk %}
+                            {% if not u.is_super_admin or user.is_super_admin %}
+                            <div class="sys-actions-inline">
+                                <button type="button" class="btn btn-sm btn-outline" data-modal="toggle-active"
+                                    data-url="{% url 'accounts:user_toggle_active' u.pk %}"
+                                    data-name="{{ u.get_full_name|default:u.username }}"
+                                    data-action="{% if u.is_active %}deactivate{% else %}activate{% endif %}">
+                                    {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline btn-icon-danger" data-modal="delete"
+                                    data-url="{% url 'accounts:user_delete' u.pk %}"
+                                    data-name="{{ u.get_full_name|default:u.username }}"
+                                    title="Delete account" aria-label="Delete {{ u.get_full_name|default:u.username }}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6"/></svg>
+                                </button>
+                            </div>
+                            {% else %}
+                            <span class="text-muted text-sm">Super Admin</span>
+                            {% endif %}
+                            {% else %}
+                            <span class="text-muted text-sm">Current user</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="sys-empty">No user accounts found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

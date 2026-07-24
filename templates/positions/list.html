@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Positions - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/positions.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="positions-page page-shell">
+
+    <header class="pos-page-header">
+        <div class="pos-page-header-main">
+            <h1>Positions</h1>
+            <p class="pos-page-subtitle">Job titles and roles across departments</p>
+        </div>
+        {% if can_manage %}
+        <div class="pos-page-header-actions">
+            <a href="{% url 'positions:create' %}" class="btn btn-primary btn-sm">Add position</a>
+        </div>
+        {% endif %}
+    </header>
+
+    {% if positions %}
+    <div class="pos-grid">
+        {% for pos in positions %}
+        <article class="pos-card">
+            <div class="pos-card-header">
+                <h3>{{ pos.title }}</h3>
+                {% if pos.is_active %}
+                <span class="badge badge-active">Active</span>
+                {% else %}
+                <span class="badge badge-inactive">Inactive</span>
+                {% endif %}
+            </div>
+
+            {% if pos.description %}
+            <p class="pos-card-desc">{{ pos.description|truncatewords:24 }}</p>
+            {% else %}
+            <p class="pos-card-desc pos-card-desc--empty">No description</p>
+            {% endif %}
+
+            <dl class="pos-card-details">
+                <div class="pos-card-details-wide">
+                    <dt>Department</dt>
+                    <dd>{{ pos.department.name }}</dd>
+                </div>
+                <div>
+                    <dt>Employees</dt>
+                    <dd>{{ pos.employee_count }}</dd>
+                </div>
+            </dl>
+
+            {% if can_manage %}
+            <div class="pos-card-actions">
+                <a href="{% url 'positions:edit' pos.pk %}" class="btn btn-sm btn-outline">Edit</a>
+                <button type="button" class="btn btn-sm btn-outline btn-icon-danger pos-delete-btn" data-modal="delete" data-url="{% url 'positions:delete' pos.pk %}" data-name="{{ pos.title }}" title="Delete position" aria-label="Delete {{ pos.title }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6"/></svg>
+                </button>
+            </div>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="pos-empty">
+        <h3>No positions yet</h3>
+        <p>Add positions to assign roles to employees.</p>
+        {% if can_manage %}
+        <a href="{% url 'positions:create' %}" class="btn btn-primary btn-sm">Add position</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

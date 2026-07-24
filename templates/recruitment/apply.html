@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Apply — {{ job.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/recruitment.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="rec-page page-shell rec-page-narrow">
+
+    <nav class="rec-breadcrumb">
+        <a href="{% url 'recruitment:job_list' %}">Recruitment</a>
+        <span>/</span>
+        <a href="{% url 'recruitment:job_detail' job.pk %}">{{ job.title }}</a>
+        <span>/</span>
+        <span>Apply</span>
+    </nav>
+
+    <header class="rec-page-header">
+        <div class="rec-page-header-main">
+            <h1>Apply for {{ job.title }}</h1>
+            <p class="rec-page-subtitle">{{ job.department.name }}</p>
+        </div>
+    </header>
+
+    <section class="rec-section rec-form-section">
+        <div class="rec-section-body">
+            <form method="post" enctype="multipart/form-data" class="form-grid" novalidate>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">First name</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Last name</label>
+                    {{ form.last_name }}
+                </div>
+                <div class="form-group form-group-full">
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.phone.id_for_label }}">Phone</label>
+                    {{ form.phone }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.linkedin_url.id_for_label }}">LinkedIn</label>
+                    {{ form.linkedin_url }}
+                </div>
+                <div class="form-group form-group-full">
+                    <label for="{{ form.resume.id_for_label }}">Resume (PDF/DOC)</label>
+                    {{ form.resume }}
+                </div>
+                <div class="form-group form-group-full">
+                    <label for="{{ form.cover_letter.id_for_label }}">Cover letter</label>
+                    {{ form.cover_letter }}
+                </div>
+                {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+                <div class="form-actions form-group-full">
+                    <button type="submit" class="btn btn-primary">Submit application</button>
+                    <a href="{% url 'recruitment:job_detail' job.pk %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

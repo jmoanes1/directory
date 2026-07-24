@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Performance{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/performance.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="perf-page page-shell perf-page-narrow">
+
+    <nav class="perf-breadcrumb">
+        <a href="{% url 'performance:dashboard' %}">Performance</a>
+        <span>/</span>
+        <span>{{ title }}</span>
+    </nav>
+
+    <header class="perf-page-header">
+        <div class="perf-page-header-main">
+            <h1>{{ title }}</h1>
+        </div>
+    </header>
+
+    <section class="perf-section perf-form-section">
+        <div class="perf-section-body" style="padding:1.25rem">
+            <form method="post" class="form-grid" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group {% if field.name in 'strengths,areas_for_improvement,goals_summary,manager_feedback' %}form-group-full{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+                </div>
+                {% endfor %}
+                <div class="form-actions form-group-full">
+                    <button type="submit" class="btn btn-primary">Save review</button>
+                    <a href="{% url 'performance:dashboard' %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
