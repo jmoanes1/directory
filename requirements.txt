@@ -12,7 +12,7 @@ django-cors-headers==4.9.0
 python-dotenv==1.2.2
 
 # App features: photos, Excel/PDF export, employee QR codes
-Pillow==10.3.0
+Pillow==11.2.1
 openpyxl==3.1.5
 reportlab==4.2.0
 qrcode==8.2
