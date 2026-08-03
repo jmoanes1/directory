@@ -20,12 +20,11 @@ services:
         generateValue: true
       - key: DEBUG
         value: "False"
-      # Leading-dot form allows any *.onrender.com hostname
+      # Explicit host + leading-dot form for any *.onrender.com hostname
       - key: ALLOWED_HOSTS
-        value: ".onrender.com"
-      # Set after first deploy, e.g. https://employee-directory.onrender.com
+        value: "directory-d5w5.onrender.com,.onrender.com"
       - key: CSRF_TRUSTED_ORIGINS
-        sync: false
+        value: "https://directory-d5w5.onrender.com"
       # Link your Render Postgres in the dashboard, or paste DATABASE_URL here
       - key: DATABASE_URL
         sync: false
