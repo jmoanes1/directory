@@ -2,6 +2,7 @@
 # Render build script for Employee Directory (Django)
 # Fail the deploy immediately if any step errors.
 set -o errexit
+set -o pipefail
 
 echo "==> Upgrading pip..."
 pip install --upgrade pip
