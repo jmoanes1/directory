@@ -10,7 +10,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from attendance.models import LeaveRequest
-from attendance.services import sync_leave_employment_statuses
+from attendance.services import count_employees_on_leave, sync_leave_employment_statuses
 from departments.models import Department
 from employees.models import ActivityLog, CompanyAnnouncement, Employee
 
@@ -53,12 +53,7 @@ def _count_upcoming_birthdays(days=30):
 
 def _on_leave_count(for_date):
     """Distinct active employees on approved leave for a given date."""
-    return Employee.objects.filter(
-        is_active=True,
-        leave_requests__status=LeaveRequest.Status.APPROVED,
-        leave_requests__start_date__lte=for_date,
-        leave_requests__end_date__gte=for_date,
-    ).distinct().count()
+    return count_employees_on_leave(for_date)
 
 
 @login_required

@@ -29,12 +29,6 @@ urlpatterns = [
     # Advanced modules
     path("org-chart/", views_extras.org_chart_view, name="org_chart"),
     path("org-chart/data/", views_extras.org_chart_data_ajax, name="org_chart_data"),
-    path("team-hierarchy/", views_extras.team_hierarchy_view, name="team_hierarchy"),
-    path("ai-search/", views_extras.ai_search_view, name="ai_search"),
-    path("ai-search/query/", views_extras.ai_search_ajax, name="ai_search_ajax"),
-    path("skills/", views_extras.skills_matrix_view, name="skills_matrix"),
-    path("skills/create/", views_extras.skill_create_view, name="skill_create"),
-    path("skills/assign/", views_extras.employee_skill_assign_view, name="skill_assign"),
     path("<int:pk>/id-card/", views_extras.id_card_view, name="id_card"),
     path("<int:pk>/id-card/download/", views_extras.id_card_download_view, name="id_card_download"),
 ]

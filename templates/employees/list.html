@@ -20,6 +20,7 @@
     <div class="dir-stats-bar">
         <div class="dir-stats">
             <span class="dir-stat">Total employees:<strong id="statTotal">{{ site_total_employees }}</strong></span>
+            <span class="dir-stat">On leave today:<strong id="statOnLeave">{{ site_on_leave_count }}</strong></span>
             <span class="dir-stat">New hires this month:<strong id="statNewHires">{{ site_new_hires }}</strong></span>
         </div>
         {% if can_manage %}

@@ -18,7 +18,7 @@
             </p>
         </div>
         <div class="mgr-page-header-actions">
-            <a href="{% url 'employees:team_hierarchy' %}" class="btn btn-outline btn-sm">Team hierarchy</a>
+            <a href="{% url 'employees:org_chart' %}" class="btn btn-outline btn-sm">Org chart</a>
             <a href="{% url 'attendance:leave_list' %}" class="btn btn-outline btn-sm">Review leave</a>
             {% if user.can_manage_employees %}
             <a href="{% url 'attendance:report' %}" class="btn btn-outline btn-sm">Attendance reports</a>
@@ -47,7 +47,7 @@
 
     <nav class="mgr-nav" aria-label="Manager shortcuts">
         <a href="{% url 'employees:list' %}" class="mgr-nav-link">Employee directory</a>
-        <a href="{% url 'employees:team_hierarchy' %}" class="mgr-nav-link">Team hierarchy</a>
+        <a href="{% url 'employees:org_chart' %}" class="mgr-nav-link">Org chart</a>
         <a href="{% url 'attendance:leave_list' %}" class="mgr-nav-link">Leave requests</a>
         <a href="{% url 'attendance:dashboard' %}" class="mgr-nav-link">Attendance</a>
         {% if user.can_manage_employees %}
@@ -99,7 +99,7 @@
                     <li>
                         <div class="mgr-list-main">
                             <span>{{ leave.employee.full_name }}</span>
-                            <span class="mgr-list-sub">{{ leave.leave_type.name }}</span>
+                            <span class="mgr-list-sub">{{ leave.leave_type.name }} · {{ leave.total_days }} day{{ leave.total_days|pluralize }}</span>
                         </div>
                         <span class="mgr-list-meta">{{ leave.start_date|date:"M d" }} – {{ leave.end_date|date:"M d" }}</span>
                     </li>

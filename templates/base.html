@@ -23,10 +23,7 @@
     <div class="app-layout">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <a href="{% url 'dashboard:home' %}" class="logo">
-                    <span class="logo-icon">ED</span>
-                    <span class="logo-text">Employee<br>Directory</span>
-                </a>
+                {% include "includes/app_logo.html" %}
             </div>
 
             {% include "includes/sidebar_nav.html" %}
@@ -80,12 +77,11 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
                 </button>
                 <div class="topbar-brand-mobile">
-                    <span class="logo-icon">ED</span>
-                    <span>Employee Directory</span>
+                    {% include "includes/app_logo.html" with logo_compact=True %}
                 </div>
                 <div class="topbar-search">
-                    <form action="{% url 'employees:ai_search' %}" method="get" aria-label="AI employee search">
-                        <input type="search" name="query" placeholder="Ask AI about employees…" class="search-input" aria-label="Ask AI about employees">
+                    <form action="{% url 'employees:list' %}" method="get" aria-label="Search employees">
+                        <input type="search" name="search" placeholder="Search employees…" class="search-input" aria-label="Search employees">
                     </form>
                 </div>
                 <a href="{% url 'employees:list' %}" class="topbar-mobile-search" aria-label="Browse employee directory">

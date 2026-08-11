@@ -218,33 +218,25 @@ a:hover {
 }
 
 .sidebar-header {
-    padding: 1.25rem 1.125rem 1rem;
-}
-
-.sidebar .logo-text {
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    line-height: 1.4;
-    color: var(--text-primary);
+    padding: 1.125rem 1rem 1rem;
 }
 
 .sidebar-nav {
-    padding: 0.875rem 0.75rem 1rem;
+    padding: 0.75rem 0.625rem 1rem;
 }
 
 .nav-group-label {
-    color: var(--color-primary);
+    color: var(--text-muted);
 }
 
 .sidebar .nav-item {
-    padding: 0.5625rem 0.625rem;
-    border-radius: 10px;
+    padding: 0.5rem 0.5rem;
+    border-radius: 8px;
     font-size: 0.8125rem;
 }
 
 .sidebar .nav-item.active {
     background: var(--bg-sidebar-active);
-    border-color: transparent;
     color: var(--color-primary);
     font-weight: 600;
 }
@@ -472,36 +464,9 @@ a:hover {
     --dash-shadow-hover: var(--shadow-md);
 }
 
-.dash-kpi-section {
-    padding: 0;
-    background: transparent;
-    border-radius: 0;
-}
-
-.dash-kpi-card {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
+.dash-overview-card {
+    border-color: var(--border-subtle);
     box-shadow: var(--shadow-card);
-}
-
-.dash-kpi-card::before {
-    display: none;
-}
-
-.dash-kpi-card:hover {
-    border-color: rgba(79, 70, 229, 0.25);
-}
-
-.dash-kpi-icon--primary {
-    color: var(--color-primary);
-    background: rgba(79, 70, 229, 0.1);
-}
-
-.dash-kpi-icon--accent {
-    color: var(--color-accent);
-    background: rgba(6, 182, 212, 0.1);
 }
 
 .dash-chart-card,
@@ -540,20 +505,13 @@ a:hover {
     box-shadow: var(--shadow-lg);
 }
 
-.auth-layout {
-    background: var(--bg-body);
+.auth-logo .app-logo {
+    justify-content: center;
 }
 
-.auth-logo-icon.logo-icon {
-    background: linear-gradient(145deg, #4F46E5 0%, #4338CA 100%) !important;
-    color: #FFFFFF !important;
-    border-radius: 14px !important;
-}
-
-.logo-icon {
-    background: var(--color-primary) !important;
-    color: #FFFFFF !important;
-    border-radius: 10px !important;
+.auth-logo .app-logo-copy {
+    align-items: center;
+    text-align: center;
 }
 
 /* ===== Breadcrumbs & wayfinding ===== */
@@ -602,7 +560,6 @@ a:hover {
 
 @media (prefers-reduced-motion: reduce) {
     .dir-emp-card:hover,
-    .dash-kpi-card:hover,
     .btn:active {
         transform: none;
     }
@@ -673,7 +630,7 @@ a:hover {
     background: rgba(255, 255, 255, 0.02);
 }
 
-[data-theme="dark"] .sidebar .logo-text {
+[data-theme="dark"] .app-logo-title {
     color: var(--text-primary);
 }
 

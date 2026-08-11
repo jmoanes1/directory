@@ -166,6 +166,171 @@
     padding: 1.125rem;
 }
 
+.settings-section-body-flush {
+    padding: 0;
+}
+
+.settings-shortcuts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.settings-shortcut {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1.125rem;
+    border-bottom: 1px solid var(--border-subtle);
+    color: inherit;
+    text-decoration: none;
+    transition: background var(--transition), color var(--transition);
+}
+
+.settings-shortcut:nth-child(odd) {
+    border-right: 1px solid var(--border-subtle);
+}
+
+.settings-shortcut:nth-last-child(-n+2) {
+    border-bottom: none;
+}
+
+.settings-shortcut:hover {
+    background: var(--color-primary-light);
+    color: inherit;
+}
+
+.settings-shortcut-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-md);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--color-primary);
+    flex-shrink: 0;
+    transition: border-color var(--transition), background var(--transition);
+}
+
+.settings-shortcut-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.settings-shortcut:hover .settings-shortcut-icon {
+    border-color: var(--color-primary);
+    background: var(--bg-surface);
+}
+
+.settings-shortcut-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.settings-shortcut-body strong {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+}
+
+.settings-shortcut-body span {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.settings-shortcut-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity var(--transition), transform var(--transition), color var(--transition);
+}
+
+.settings-shortcut-arrow svg {
+    width: 16px;
+    height: 16px;
+}
+
+.settings-shortcut:hover .settings-shortcut-arrow {
+    opacity: 1;
+    transform: translateX(0);
+    color: var(--color-primary);
+}
+
+/* Single-column shortcut list (e.g. Data & export) */
+.settings-shortcuts--stacked {
+    grid-template-columns: 1fr;
+}
+
+.settings-shortcuts--stacked .settings-shortcut {
+    border-right: none;
+}
+
+.settings-shortcuts--stacked .settings-shortcut:not(:last-child) {
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-shortcuts--stacked .settings-shortcut:last-child {
+    border-bottom: none;
+}
+
+.settings-shortcut--primary .settings-shortcut-icon {
+    background: var(--color-primary-light);
+    border-color: rgba(37, 99, 235, 0.25);
+    color: var(--color-primary);
+}
+
+.settings-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.375rem;
+    padding: 1.5rem 1rem;
+    background: var(--bg-body);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--border-radius-md);
+}
+
+.settings-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 0.375rem;
+    border-radius: 50%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+.settings-empty-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.settings-empty-state p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.settings-empty-state > span {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+    max-width: 28rem;
+}
+
 .settings-row {
     display: flex;
     flex-wrap: wrap;
@@ -418,6 +583,26 @@
         flex: 1 1 auto;
         justify-content: center;
         min-width: calc(50% - 0.25rem);
+    }
+
+    .settings-shortcuts {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-shortcut:nth-child(odd) {
+        border-right: none;
+    }
+
+    .settings-shortcut:not(:last-child) {
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .settings-shortcut:nth-last-child(-n+2) {
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .settings-shortcut:last-child {
+        border-bottom: none;
     }
 }
 

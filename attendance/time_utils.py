@@ -20,6 +20,13 @@ def local_time_now():
     return local_now().time().replace(microsecond=0)
 
 
+def format_timezone_label(tzinfo):
+    """Return a readable timezone name (e.g. Asia/Manila)."""
+    if tzinfo is None:
+        return ""
+    return getattr(tzinfo, "key", None) or getattr(tzinfo, "zone", None) or str(tzinfo)
+
+
 def resolve_punch_datetime(client_time_raw=None, max_drift_seconds=120):
     """
     Resolve punch date/time from client click timestamp or server clock.

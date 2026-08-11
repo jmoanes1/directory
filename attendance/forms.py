@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 from accounts.forms import StyledFormMixin
 from attendance.models import AttendanceRecord, LeaveRequest, LeaveType
+from attendance.services import get_leave_balances
 from employees.models import Employee
 
 
@@ -21,10 +22,19 @@ class LeaveRequestForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = LeaveRequest
         fields = ["leave_type", "start_date", "end_date", "reason"]
+        labels = {
+            "leave_type": "Leave type",
+            "start_date": "Start date",
+            "end_date": "End date",
+            "reason": "Reason",
+        }
         widgets = {
             "start_date": forms.DateInput(attrs={"type": "date"}),
             "end_date": forms.DateInput(attrs={"type": "date"}),
-            "reason": forms.Textarea(attrs={"rows": 3, "placeholder": "Optional details for HR review"}),
+            "reason": forms.Textarea(attrs={
+                "rows": 4,
+                "placeholder": "Briefly describe why you need time off (optional)",
+            }),
         }
 
     def __init__(self, *args, user=None, linked_employee=None, **kwargs):
@@ -43,6 +53,22 @@ class LeaveRequestForm(StyledFormMixin, forms.ModelForm):
             self.order_fields(["employee", "leave_type", "start_date", "end_date", "reason"])
         else:
             self.fields.pop("employee", None)
+
+        if linked_employee:
+            self._apply_leave_type_balance_labels(linked_employee)
+
+    def _apply_leave_type_balance_labels(self, employee):
+        """Show remaining days beside each leave type in the dropdown."""
+        balances = {row["leave_type"].pk: row for row in get_leave_balances(employee)}
+        choices = [("", "---------")]
+        for leave_type in LeaveType.objects.filter(is_active=True):
+            balance = balances.get(leave_type.pk)
+            if balance is not None:
+                label = f"{leave_type.name} ({balance['remaining']} days left)"
+            else:
+                label = leave_type.name
+            choices.append((leave_type.pk, label))
+        self.fields["leave_type"].choices = choices
 
     def clean(self):
         cleaned_data = super().clean()

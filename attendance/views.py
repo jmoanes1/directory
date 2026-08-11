@@ -5,6 +5,7 @@ from datetime import date, datetime
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -14,13 +15,16 @@ from accounts.permissions import hr_manager_required
 from attendance.forms import AttendanceCheckForm, LeaveRequestForm, LeaveReviewForm
 from attendance.models import AttendanceRecord, LeaveRequest
 from attendance.services import (
+    count_employees_on_leave,
     get_leave_balances,
     send_leave_approval_email_async,
+    serialize_leave_balances,
     sync_employee_leave_status,
     sync_leave_employment_statuses,
 )
 from attendance.time_utils import (
     build_timesheet_summary,
+    format_timezone_label,
     get_period_bounds,
     local_now,
     local_today,
@@ -78,11 +82,7 @@ def attendance_dashboard(request):
         recent_records = AttendanceRecord.objects.filter(employee=employee).order_by("-date")[:10]
 
     present_today = AttendanceRecord.objects.filter(date=today, status=AttendanceRecord.Status.PRESENT).count()
-    on_leave_today = LeaveRequest.objects.filter(
-        status=LeaveRequest.Status.APPROVED,
-        start_date__lte=today,
-        end_date__gte=today,
-    ).count()
+    on_leave_today = count_employees_on_leave(today)
     pending_leaves = LeaveRequest.objects.filter(status=LeaveRequest.Status.PENDING).count()
 
     check_form = AttendanceCheckForm()
@@ -115,7 +115,7 @@ def attendance_dashboard(request):
         "work_mode_choices": AttendanceRecord.WorkMode.choices,
         "can_manage": request.user.can_manage_employees(),
         "current_local_time": now.time(),
-        "timezone_label": str(now.tzinfo),
+        "timezone_label": format_timezone_label(now.tzinfo),
         "server_timestamp_ms": int(now.timestamp() * 1000),
     })
 
@@ -219,13 +219,15 @@ def timesheet_view(request):
         "prev_anchor": shift_period(period, anchor_date, -1),
         "next_anchor": shift_period(period, anchor_date, 1),
         "current_local_time": now.time(),
-        "timezone_label": str(now.tzinfo),
+        "timezone_label": format_timezone_label(now.tzinfo),
         "server_timestamp_ms": int(now.timestamp() * 1000),
     })
 
 
 @login_required
 def leave_list_view(request):
+    today = local_today()
+    sync_leave_employment_statuses(today)
     employee = _get_employee_for_user(request.user)
     if request.user.can_manage_employees():
         leaves = LeaveRequest.objects.select_related("employee", "leave_type", "reviewed_by").all()
@@ -234,9 +236,21 @@ def leave_list_view(request):
     else:
         leaves = LeaveRequest.objects.none()
 
+    leave_balances = get_leave_balances(employee) if employee else []
+    pending_count = leaves.filter(status=LeaveRequest.Status.PENDING).count()
+    approved_days = sum(
+        leave.total_days
+        for leave in leaves.filter(status=LeaveRequest.Status.APPROVED)
+    )
+    on_leave_count = count_employees_on_leave(today)
+
     return render(request, "attendance/leave_list.html", {
         "leaves": leaves,
         "can_manage": request.user.can_manage_employees(),
+        "leave_balances": leave_balances,
+        "pending_count": pending_count,
+        "approved_days": approved_days,
+        "on_leave_count": on_leave_count,
     })
 
 
@@ -250,13 +264,21 @@ def leave_request_view(request):
         return redirect("attendance:leave_list")
 
     form = LeaveRequestForm(request.POST or None, user=request.user, linked_employee=employee)
+    leave_balances = get_leave_balances(employee) if employee else []
+    form_context = {
+        "form": form,
+        "employee": employee,
+        "leave_balances": leave_balances,
+        "leave_balances_json": serialize_leave_balances(leave_balances),
+        "can_manage": can_manage,
+    }
     if request.method == "POST" and form.is_valid():
         leave = form.save(commit=False)
         # HR/admin pick the employee on the form; everyone else uses their linked profile.
         leave.employee = form.cleaned_data.get("employee") or employee
         if not leave.employee_id:
             messages.error(request, "Select an employee for this leave request.")
-            return render(request, "attendance/leave_form.html", {"form": form})
+            return render(request, "attendance/leave_form.html", form_context)
         leave.save()
         notify_hr_managers(
             title="New Leave Request",
@@ -268,7 +290,21 @@ def leave_request_view(request):
         messages.success(request, "Leave request submitted successfully.")
         return redirect("attendance:leave_list")
 
-    return render(request, "attendance/leave_form.html", {"form": form})
+    return render(request, "attendance/leave_form.html", form_context)
+
+
+@login_required
+def leave_balances_api(request, employee_id):
+    """Return leave balances for the request form (HR employee picker)."""
+    target = get_object_or_404(Employee, pk=employee_id, is_active=True)
+    linked = _get_employee_for_user(request.user)
+
+    if not request.user.can_manage_employees():
+        if not linked or linked.pk != target.pk:
+            return JsonResponse({"error": "Forbidden"}, status=403)
+
+    balances = serialize_leave_balances(get_leave_balances(target))
+    return JsonResponse({"balances": balances})
 
 
 @hr_manager_required

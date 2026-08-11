@@ -233,6 +233,18 @@
     border-bottom: none;
 }
 
+.ss-list-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.ss-list-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
 .ss-muted {
     margin: 0;
     font-size: 0.875rem;

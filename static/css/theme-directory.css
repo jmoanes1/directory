@@ -518,6 +518,8 @@ body {
 
 .dir-emp-card-top .avatar {
     flex-shrink: 0;
+    width: 48px;
+    height: 48px;
 }
 
 .dir-emp-card-info {

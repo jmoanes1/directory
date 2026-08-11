@@ -12,183 +12,223 @@
 
     <header class="att-page-header">
         <div class="att-page-header-main">
+            <p class="att-page-eyebrow">{% now "l, F j" %} · {{ timezone_label }}</p>
             <h1>Attendance & leave</h1>
-            <p class="att-page-subtitle">Punch time is recorded when you click each action · {{ timezone_label }}</p>
+            <p class="att-page-subtitle">Punch in, review your timesheet, and manage time off</p>
         </div>
         <div class="att-page-header-actions">
             <a href="{% url 'attendance:timesheet' %}" class="btn btn-primary btn-sm">My timesheet</a>
             <a href="{% url 'attendance:leave_request' %}" class="btn btn-outline btn-sm">Request leave</a>
-            <a href="{% url 'attendance:leave_list' %}" class="btn btn-outline btn-sm">Leave history</a>
-            {% if can_manage %}
-            <a href="{% url 'attendance:report' %}" class="btn btn-outline btn-sm">Reports</a>
-            {% endif %}
         </div>
     </header>
 
-    <section class="att-stats" aria-label="Today's summary">
-        <article class="att-stat">
+    {% include "includes/attendance_tabs.html" with active_tab="overview" %}
+
+    <section class="att-stats att-stats--row" aria-label="Today's summary">
+        <article class="att-stat att-stat--compact">
             <span class="att-stat-value">{{ present_today }}</span>
             <span class="att-stat-label">Present today</span>
         </article>
-        <article class="att-stat">
+        <article class="att-stat att-stat--compact">
             <span class="att-stat-value">{{ on_leave_today }}</span>
             <span class="att-stat-label">On leave</span>
         </article>
-        <article class="att-stat">
+        <article class="att-stat att-stat--compact">
             <span class="att-stat-value">{{ pending_leaves }}</span>
             <span class="att-stat-label">Pending requests</span>
         </article>
     </section>
 
-    {% if employee and leave_balances %}
-    <section class="att-section">
-        <div class="att-section-header">
-            <h2>Leave balances {% now "Y" %}</h2>
-        </div>
-        <div class="att-section-body">
-            <div class="leave-balance-grid">
-                {% for b in leave_balances %}
-                <div class="leave-balance-item">
-                    <span class="leave-balance-type" style="border-left-color:{{ b.leave_type.color }}">{{ b.leave_type.name }}</span>
-                    <span class="leave-balance-meta"><strong>{{ b.remaining }}</strong> remaining · {{ b.used }}/{{ b.entitled }} used</span>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </section>
-    {% endif %}
-
     {% if employee %}
-    <div class="att-clock-bar">
-        <div class="att-clock-item">
-            <span class="att-clock-label">Today</span>
-            <strong>{% now "l, F j, Y" %}</strong>
-        </div>
-        <div class="att-clock-item att-clock-item-center">
-            <span class="att-clock-label">Next punch</span>
-            <strong id="punchPreviewTime">{{ current_local_time|attendance_time }}</strong>
-        </div>
-        <div class="att-clock-item att-clock-item-end">
-            <span class="att-clock-label">Local time</span>
-            <strong id="attendanceClock">{{ current_local_time|attendance_time }}</strong>
-        </div>
-    </div>
+    <div class="att-dashboard-grid">
 
-    <section class="att-section att-punch-section">
-        <div class="att-section-header">
-            <div>
-                <h2>Today's attendance</h2>
-                <p class="att-section-sub">{{ employee.full_name }}</p>
-            </div>
-            {% if today_record %}
-            <span class="badge {% if today_record.is_wfh %}badge-outline{% else %}badge-active{% endif %}">
-                {% if today_record.is_wfh %}WFH{% else %}Office{% endif %}
-            </span>
-            {% endif %}
-        </div>
-        <div class="att-section-body att-punch-body">
-            {% if today_record and today_record.is_day_complete %}
-            <p class="att-help-text">Day complete · {{ today_record.hours_worked_display }} total</p>
-            {% else %}
-            <p class="att-help-text">Choose work mode, then punch in order. Time is saved when you click each button.</p>
-            {% endif %}
+        <div class="att-dashboard-main">
 
-            {% if not today_record or not today_record.is_day_complete %}
-            <div class="work-mode-toggle" role="group" aria-label="Work mode">
-                <span class="work-mode-label">Work mode</span>
-                <div class="work-mode-buttons">
-                    <button type="button" class="work-mode-btn {% if selected_work_mode == 'office' %}is-active{% endif %}" data-work-mode="office" aria-pressed="{% if selected_work_mode == 'office' %}true{% else %}false{% endif %}">Office</button>
-                    <button type="button" class="work-mode-btn {% if selected_work_mode == 'wfh' %}is-active{% endif %}" data-work-mode="wfh" aria-pressed="{% if selected_work_mode == 'wfh' %}true{% else %}false{% endif %}">WFH</button>
+            <section class="att-section att-punch-card">
+                <div class="att-punch-card-top">
+                    <div class="att-punch-card-intro">
+                        <h2>Today's attendance</h2>
+                        <p class="att-section-sub">{{ employee.full_name }}</p>
+                    </div>
+                    <div class="att-punch-card-meta">
+                        <div class="att-live-clock">
+                            <span class="att-clock-label">Local time</span>
+                            <strong id="attendanceClock">{{ current_local_time|attendance_time }}</strong>
+                        </div>
+                        {% if today_record %}
+                        <span class="att-mode-badge {% if today_record.is_wfh %}att-mode-badge--wfh{% else %}att-mode-badge--office{% endif %}">
+                            {% if today_record.is_wfh %}WFH{% else %}Office{% endif %}
+                        </span>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
-            {% endif %}
 
-            <div class="attendance-timeline">
-                {% for action in punch_actions %}
-                <div class="attendance-slot {% if action.is_done %}is-done{% endif %} {% if action.is_next %}is-next{% endif %}">
-                    <span class="attendance-slot-label">{{ action.label }}</span>
-                    <span class="attendance-slot-time" data-slot="{{ action.key }}">
-                        {% if action.time %}{{ action.time|attendance_time }}{% else %}—{% endif %}
-                    </span>
-                </div>
-                {% endfor %}
-            </div>
-
-            {% if today_record and today_record.time_in_morning %}
-            <div class="timesheet-day-summary">
-                <span>Mode: <strong>{{ today_record.work_mode_display }}</strong></span>
-                <span>Morning: <strong>{{ today_record.morning_hours_display }}</strong></span>
-                <span>Break: <strong>{{ today_record.break_duration_display }}</strong></span>
-                <span>Afternoon: <strong>{{ today_record.afternoon_hours_display }}</strong></span>
-                <span>Total: <strong>{{ today_record.hours_worked_display }}</strong></span>
-            </div>
-            {% endif %}
-
-            <div class="attendance-actions">
-                {% for action in punch_actions %}
-                    {% if action.is_next %}
-                    <form action="{% url 'attendance:punch' %}" method="post" class="attendance-punch-form inline-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="{{ action.key }}">
-                        <input type="hidden" name="client_time" class="punch-client-time" value="">
-                        <input type="hidden" name="work_mode" class="punch-work-mode" value="{{ selected_work_mode }}">
-                        <button type="submit" class="btn {% if action.key == 'time_in_morning' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
-                            {{ action.label }}
-                        </button>
-                    </form>
+                <div class="att-punch-card-body">
+                    {% if today_record and today_record.is_day_complete %}
+                    <div class="att-punch-status att-punch-status--done" role="status">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                        <span>Day complete · <strong>{{ today_record.hours_worked_display }}</strong> logged</span>
+                    </div>
+                    {% elif today_record and today_record.time_in_morning %}
+                    <div class="att-punch-status" role="status">
+                        <span>In progress · <strong>{{ today_record.hours_worked_display }}</strong> so far</span>
+                    </div>
                     {% endif %}
-                {% endfor %}
-                {% if today_record and today_record.is_day_complete %}
-                <span class="badge badge-present">Completed</span>
-                {% endif %}
-            </div>
-        </div>
-    </section>
 
-    <section class="att-section">
-        <div class="att-section-header">
-            <h2>Recent attendance</h2>
-            <a href="{% url 'attendance:timesheet' %}" class="btn btn-sm btn-outline">View timesheet</a>
-        </div>
-        <div class="att-section-body att-section-body-flush">
-            {% if recent_records %}
-            <div class="table-responsive">
-                <table class="data-table att-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Mode</th>
-                            <th>Morning in</th>
-                            <th>Lunch out</th>
-                            <th>Noon in</th>
-                            <th>Afternoon out</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for rec in recent_records %}
-                        <tr>
-                            <td>{{ rec.date|date:"M d" }}</td>
-                            <td>{% if rec.is_wfh %}WFH{% else %}Office{% endif %}</td>
-                            <td>{{ rec.time_in_morning|attendance_time }}</td>
-                            <td>{{ rec.break_lunch|attendance_time }}</td>
-                            <td>{{ rec.time_in_noon|attendance_time }}</td>
-                            <td>{{ rec.time_out_afternoon|attendance_time }}</td>
-                            <td>{{ rec.hours_worked_display }}</td>
-                            <td><span class="badge badge-{{ rec.status }}">{{ rec.get_status_display }}</span></td>
-                        </tr>
+                    {% if not today_record or not today_record.is_day_complete %}
+                    <div class="work-mode-toggle" role="group" aria-label="Work mode">
+                        <span class="work-mode-label">Work mode</span>
+                        <div class="work-mode-buttons">
+                            <button type="button" class="work-mode-btn {% if selected_work_mode == 'office' %}is-active{% endif %}" data-work-mode="office" aria-pressed="{% if selected_work_mode == 'office' %}true{% else %}false{% endif %}">Office</button>
+                            <button type="button" class="work-mode-btn {% if selected_work_mode == 'wfh' %}is-active{% endif %}" data-work-mode="wfh" aria-pressed="{% if selected_work_mode == 'wfh' %}true{% else %}false{% endif %}">WFH</button>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="attendance-timeline" role="list" aria-label="Punch sequence">
+                        {% for action in punch_actions %}
+                        <div class="attendance-slot {% if action.is_done %}is-done{% endif %} {% if action.is_next %}is-next{% endif %}" role="listitem">
+                            <span class="attendance-slot-step" aria-hidden="true">{% if action.is_done %}✓{% else %}{{ forloop.counter }}{% endif %}</span>
+                            <span class="attendance-slot-label">{{ action.label }}</span>
+                            <span class="attendance-slot-time" data-slot="{{ action.key }}">
+                                {% if action.time %}{{ action.time|attendance_time }}{% else %}—{% endif %}
+                            </span>
+                        </div>
                         {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="att-empty-inline">
-                <p>No records yet. Record <strong>Time in (morning)</strong> to start tracking.</p>
-            </div>
-            {% endif %}
+                    </div>
+
+                    {% if today_record and today_record.time_in_morning %}
+                    <div class="att-day-summary">
+                        <span>Morning <strong>{{ today_record.morning_hours_display }}</strong></span>
+                        <span>Break <strong>{{ today_record.break_duration_display }}</strong></span>
+                        <span>Afternoon <strong>{{ today_record.afternoon_hours_display }}</strong></span>
+                        <span class="att-day-summary-total">Total <strong>{{ today_record.hours_worked_display }}</strong></span>
+                    </div>
+                    {% endif %}
+
+                    <div class="attendance-actions">
+                        {% for action in punch_actions %}
+                            {% if action.is_next %}
+                            <div class="att-punch-cta">
+                                <form action="{% url 'attendance:punch' %}" method="post" class="attendance-punch-form inline-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="{{ action.key }}">
+                                    <input type="hidden" name="client_time" class="punch-client-time" value="">
+                                    <input type="hidden" name="work_mode" class="punch-work-mode" value="{{ selected_work_mode }}">
+                                    <button type="submit" class="btn btn-primary att-punch-btn">
+                                        {{ action.label }}
+                                        <span class="att-punch-btn-time" id="punchPreviewTime">{{ current_local_time|attendance_time }}</span>
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                        {% if today_record and today_record.is_day_complete %}
+                        <span class="att-complete-label">All punches recorded</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="att-section">
+                <div class="att-section-header att-section-header--plain">
+                    <h2>Recent attendance</h2>
+                    <a href="{% url 'attendance:timesheet' %}" class="att-section-link">View full timesheet</a>
+                </div>
+                <div class="att-section-body att-section-body-flush">
+                    {% if recent_records %}
+                    <div class="table-responsive">
+                        <table class="data-table att-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Mode</th>
+                                    <th>In</th>
+                                    <th>Lunch</th>
+                                    <th>Back</th>
+                                    <th>Out</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rec in recent_records %}
+                                <tr>
+                                    <td>{{ rec.date|date:"M d" }}</td>
+                                    <td><span class="att-table-mode">{% if rec.is_wfh %}WFH{% else %}Office{% endif %}</span></td>
+                                    <td>{{ rec.time_in_morning|attendance_time }}</td>
+                                    <td>{{ rec.break_lunch|attendance_time }}</td>
+                                    <td>{{ rec.time_in_noon|attendance_time }}</td>
+                                    <td>{{ rec.time_out_afternoon|attendance_time }}</td>
+                                    <td><strong>{{ rec.hours_worked_display }}</strong></td>
+                                    <td><span class="badge badge-{{ rec.status }}">{{ rec.get_status_display }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="att-empty-inline">
+                        <p>No records yet. Punch in to start tracking today's hours.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
         </div>
-    </section>
+
+        <aside class="att-dashboard-aside">
+            {% if leave_balances %}
+            <section class="att-section">
+                <div class="att-section-header att-section-header--plain">
+                    <h2>Leave balances</h2>
+                    <span class="att-section-meta">{% now "Y" %}</span>
+                </div>
+                <div class="att-section-body att-aside-balances">
+                    {% for b in leave_balances %}
+                    <div class="leave-balance-row">
+                        <div class="leave-balance-row-head">
+                            <span class="leave-balance-dot" style="background:{{ b.leave_type.color }}"></span>
+                            <span class="leave-balance-name">{{ b.leave_type.name }}</span>
+                            <span class="leave-balance-remaining">{{ b.remaining }} left</span>
+                        </div>
+                        <div class="leave-balance-bar" aria-hidden="true">
+                            <span class="leave-balance-bar-fill" style="width:{% if b.entitled %}{% widthratio b.used b.entitled 100 %}{% else %}0{% endif %}%; background:{{ b.leave_type.color }}"></span>
+                        </div>
+                        <span class="leave-balance-foot">{{ b.used }} of {{ b.entitled }} used</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            <section class="att-section att-aside-actions">
+                <div class="att-section-header att-section-header--plain">
+                    <h2>Time off</h2>
+                </div>
+                <div class="att-section-body att-aside-action-list">
+                    <a href="{% url 'attendance:leave_request' %}" class="att-aside-action">
+                        <span class="att-aside-action-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4"/></svg>
+                        </span>
+                        <span class="att-aside-action-copy">
+                            <strong>Request leave</strong>
+                            <span>Submit a new time-off request</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'attendance:leave_list' %}" class="att-aside-action">
+                        <span class="att-aside-action-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+                        </span>
+                        <span class="att-aside-action-copy">
+                            <strong>Leave history</strong>
+                            <span>Track pending and past requests</span>
+                        </span>
+                    </a>
+                </div>
+            </section>
+        </aside>
+
+    </div>
 
     {% else %}
     <div class="att-empty">

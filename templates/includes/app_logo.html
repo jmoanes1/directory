@@ -1,0 +1,25 @@
+{# App brand mark — sidebar, auth, and mobile header #}
+{% if logo_static %}
+<div class="app-logo{% if logo_compact %} app-logo--compact{% endif %}"{% if logo_aria_label %} aria-label="{{ logo_aria_label }}"{% endif %}>
+{% else %}
+<a href="{% if logo_href %}{{ logo_href }}{% else %}{% url 'dashboard:home' %}{% endif %}" class="app-logo{% if logo_compact %} app-logo--compact{% endif %}"{% if logo_aria_label %} aria-label="{{ logo_aria_label }}"{% endif %}>
+{% endif %}
+    <span class="app-logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <rect x="3" y="3" width="8" height="8" rx="2"/>
+            <rect x="13" y="3" width="8" height="5" rx="2"/>
+            <rect x="13" y="10" width="8" height="11" rx="2"/>
+            <rect x="3" y="13" width="8" height="8" rx="2"/>
+        </svg>
+    </span>
+    {% if not logo_compact %}
+    <span class="app-logo-copy">
+        <span class="app-logo-title">Employee Directory</span>
+        <span class="app-logo-tagline">Workforce hub</span>
+    </span>
+    {% endif %}
+{% if logo_static %}
+</div>
+{% else %}
+</a>
+{% endif %}

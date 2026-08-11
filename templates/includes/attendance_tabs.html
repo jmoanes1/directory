@@ -1,0 +1,9 @@
+{# Attendance section tabs — pass active_tab: overview | timesheet | leave | report #}
+<nav class="att-tabs" aria-label="Attendance sections">
+    <a href="{% url 'attendance:dashboard' %}" class="att-tab{% if active_tab == 'overview' %} is-active{% endif %}"{% if active_tab == 'overview' %} aria-current="page"{% endif %}>Overview</a>
+    <a href="{% url 'attendance:timesheet' %}" class="att-tab{% if active_tab == 'timesheet' %} is-active{% endif %}"{% if active_tab == 'timesheet' %} aria-current="page"{% endif %}>Timesheet</a>
+    <a href="{% url 'attendance:leave_list' %}" class="att-tab{% if active_tab == 'leave' %} is-active{% endif %}"{% if active_tab == 'leave' %} aria-current="page"{% endif %}>Leave history</a>
+    {% if user.can_manage_employees %}
+    <a href="{% url 'attendance:report' %}" class="att-tab{% if active_tab == 'report' %} is-active{% endif %}"{% if active_tab == 'report' %} aria-current="page"{% endif %}>Reports</a>
+    {% endif %}
+</nav>

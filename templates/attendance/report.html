@@ -10,21 +10,15 @@
 {% block content %}
 <div class="attendance-page page-shell attendance-subpage">
 
-    <nav class="att-breadcrumb">
-        <a href="{% url 'attendance:dashboard' %}">Attendance</a>
-        <span>/</span>
-        <span>Report</span>
-    </nav>
-
     <header class="att-page-header">
         <div class="att-page-header-main">
+            <p class="att-page-eyebrow">{{ month_start|date:"F Y" }}</p>
             <h1>Attendance report</h1>
-            <p class="att-page-subtitle">{{ month_start|date:"F Y" }}</p>
-        </div>
-        <div class="att-page-header-actions">
-            <a href="{% url 'attendance:dashboard' %}" class="btn btn-outline btn-sm">Back</a>
+            <p class="att-page-subtitle">Monthly attendance summary across the workforce</p>
         </div>
     </header>
+
+    {% include "includes/attendance_tabs.html" with active_tab="report" %}
 
     <section class="att-stats">
         {% for item in summary %}

@@ -155,10 +155,15 @@
         return Object.keys(groups).sort().map(letter => ({ letter, items: groups[letter] }));
     }
 
+    function renderAvatar(emp, sizeClass) {
+        if (emp.photo_url) {
+            return `<div class="avatar ${sizeClass}"><img src="${escapeHtml(emp.photo_url)}" alt="${escapeHtml(emp.full_name)}"></div>`;
+        }
+        return `<div class="avatar ${sizeClass}">${escapeHtml(emp.initials)}</div>`;
+    }
+
     function renderCard(emp) {
-        const photo = emp.photo_url
-            ? `<img src="${escapeHtml(emp.photo_url)}" alt="${escapeHtml(emp.full_name)}" class="avatar avatar-md">`
-            : `<div class="avatar avatar-md">${escapeHtml(emp.initials)}</div>`;
+        const photo = renderAvatar(emp, 'avatar-md');
 
         const phoneAction = emp.phone
             ? `<a href="tel:${escapeHtml(emp.phone)}" class="dir-emp-action dir-emp-action--call" title="Call"><span class="dir-emp-action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></span>Call</a>`
@@ -211,11 +216,12 @@
     }
 
     function renderTableRow(emp) {
+        const avatar = renderAvatar(emp, 'avatar-sm');
         return `
             <tr class="emp-table-row" data-href="${escapeHtml(emp.detail_url)}" tabindex="0" role="link" aria-label="View ${escapeHtml(emp.full_name)}">
                 <td>
                     <a href="${escapeHtml(emp.detail_url)}" class="table-employee">
-                        <div class="avatar avatar-sm">${escapeHtml(emp.initials)}</div>
+                        ${avatar}
                         ${escapeHtml(emp.full_name)}
                     </a>
                 </td>

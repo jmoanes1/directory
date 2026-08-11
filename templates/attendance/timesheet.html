@@ -12,14 +12,16 @@
 
     <header class="att-page-header">
         <div class="att-page-header-main">
+            <p class="att-page-eyebrow">{{ employee.full_name }} · {{ timezone_label }}</p>
             <h1>My timesheet</h1>
-            <p class="att-page-subtitle">{{ employee.full_name }} · {{ period_label }} · {{ timezone_label }}</p>
+            <p class="att-page-subtitle">{{ period_label }}</p>
         </div>
         <div class="att-page-header-actions">
-            <a href="{% url 'attendance:dashboard' %}" class="btn btn-outline btn-sm">Attendance</a>
-            <a href="{% url 'attendance:leave_list' %}" class="btn btn-outline btn-sm">Leave history</a>
+            <a href="{% url 'attendance:leave_request' %}" class="btn btn-outline btn-sm">Request leave</a>
         </div>
     </header>
+
+    {% include "includes/attendance_tabs.html" with active_tab="timesheet" %}
 
     <div class="att-section">
         <div class="att-section-body timesheet-toolbar-body">

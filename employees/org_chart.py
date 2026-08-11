@@ -54,56 +54,6 @@ def build_org_tree(root_employee=None):
     return [build_node(rid) for rid in sorted(roots, key=lambda rid: emp_map[rid].last_name if rid in emp_map else "")]
 
 
-def build_department_hierarchy():
-    """Build team hierarchy grouped by department with managers."""
-    from departments.models import Department
-
-    departments = Department.objects.filter(is_active=True).prefetch_related(
-        "employees", "employees__position", "employees__manager"
-    )
-
-    hierarchy = []
-    for dept in departments:
-        members = dept.employees.filter(is_active=True).select_related("position", "manager")
-        head = dept.head
-        dept_managers = members.filter(direct_reports__isnull=False).distinct()
-
-        hierarchy.append({
-            "id": dept.pk,
-            "name": dept.name,
-            "head": {
-                "id": head.pk,
-                "name": head.full_name,
-                "position": head.position.title,
-            } if head else None,
-            "employee_count": members.count(),
-            "teams": [
-                {
-                    "manager": {
-                        "id": mgr.pk,
-                        "name": mgr.full_name,
-                        "position": mgr.position.title,
-                    },
-                    "members": [
-                        {
-                            "id": m.pk,
-                            "name": m.full_name,
-                            "position": m.position.title,
-                        }
-                        for m in members.filter(manager=mgr).order_by("last_name")
-                    ],
-                }
-                for mgr in dept_managers.order_by("last_name")
-            ],
-            "unassigned": [
-                {"id": m.pk, "name": m.full_name, "position": m.position.title}
-                for m in members.filter(manager__isnull=True).exclude(pk=head.pk if head else None).order_by("last_name")
-            ],
-        })
-
-    return hierarchy
-
-
 def get_org_stats():
     """Summary statistics for org chart page."""
     total = Employee.objects.filter(is_active=True).count()

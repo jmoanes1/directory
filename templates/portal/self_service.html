@@ -85,7 +85,10 @@
                 <ul class="ss-list">
                     {% for leave in recent_leaves %}
                     <li>
-                        <span>{{ leave.leave_type.name }}</span>
+                        <div class="ss-list-main">
+                            <span>{{ leave.leave_type.name }}</span>
+                            <span class="ss-list-sub">{{ leave.start_date|date:"M d" }} – {{ leave.end_date|date:"M d" }} · {{ leave.total_days }} day{{ leave.total_days|pluralize }}</span>
+                        </div>
                         <span class="badge badge-{{ leave.status }}">{{ leave.get_status_display }}</span>
                     </li>
                     {% endfor %}

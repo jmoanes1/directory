@@ -1,26 +1,21 @@
-"""Extended employee views: org chart, AI search, skills matrix, ID cards."""
+"""Extended employee views: org chart and ID cards."""
 
 import io
 import json
 
 import qrcode
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.views.decorators.http import require_GET, require_POST
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 
-from accounts.permissions import employee_manager_required
-from employees.ai_search import ai_search_employees, generate_chat_response
-from employees.forms_extras import AISearchForm, EmployeeSkillForm, SkillForm
-from employees.models import Employee, EmployeeSkill, Skill
-from employees.org_chart import build_department_hierarchy, build_org_tree, get_org_stats
+from employees.models import Employee
+from employees.org_chart import build_org_tree, get_org_stats
 from employees.utils import log_activity
 
 
@@ -53,131 +48,6 @@ def org_chart_data_ajax(request):
     root = int(root_id) if root_id else None
     tree = build_org_tree(root)
     return JsonResponse({"tree": tree})
-
-
-@login_required
-def team_hierarchy_view(request):
-    """Department-based team hierarchy visualization."""
-    hierarchy = build_department_hierarchy()
-    return render(request, "employees/team_hierarchy.html", {
-        "hierarchy_json": json.dumps(hierarchy),
-        "hierarchy": hierarchy,
-    })
-
-
-@login_required
-def ai_search_view(request):
-    """AI-powered natural language employee search."""
-    form = AISearchForm(request.GET or None)
-    results = []
-    summary = ""
-    interpreted = ""
-
-    if request.GET.get("query"):
-        results, params, summary = ai_search_employees(request.GET["query"])
-        interpreted = params.get("interpreted", "")
-        log_activity(request, "view", f"AI search: {request.GET['query']}", "Employee")
-
-    return render(request, "employees/ai_search.html", {
-        "form": form,
-        "results": results,
-        "summary": summary,
-        "interpreted": interpreted,
-        "query": request.GET.get("query", ""),
-    })
-
-
-@login_required
-@require_GET
-def ai_search_ajax(request):
-    """AJAX endpoint for AI search."""
-    query = request.GET.get("query", "").strip()
-    if not query:
-        return JsonResponse({"employees": [], "summary": "Please enter a search query.", "interpreted": ""})
-
-    results, params, summary = ai_search_employees(query)
-    employees_data = [
-        {
-            "id": e.pk,
-            "employee_id": e.employee_id,
-            "full_name": e.full_name,
-            "email": e.email,
-            "department": e.department.name,
-            "position": e.position.title,
-            "initials": e.initials,
-            "detail_url": reverse("employees:detail", kwargs={"pk": e.pk}),
-        }
-        for e in results
-    ]
-    return JsonResponse({
-        "employees": employees_data,
-        "summary": summary,
-        "interpreted": params.get("interpreted", ""),
-    })
-
-
-@login_required
-def skills_matrix_view(request):
-    """Employee skills matrix grid view."""
-    department_id = request.GET.get("department")
-    category = request.GET.get("category")
-
-    skills = Skill.objects.filter(is_active=True)
-    if category:
-        skills = skills.filter(category=category)
-
-    employees = Employee.objects.filter(is_active=True).select_related("department", "position")
-    if department_id:
-        employees = employees.filter(department_id=department_id)
-
-    # Build matrix: {employee_id: {skill_id: proficiency_level}}
-    matrix = {}
-    for es in EmployeeSkill.objects.filter(
-        employee__in=employees, skill__in=skills
-    ).select_related("employee", "skill"):
-        matrix.setdefault(es.employee_id, {})[es.skill_id] = {
-            "level": es.proficiency_level,
-            "label": es.get_proficiency_display(),
-        }
-
-    # Build matrix rows aligned with skill columns for the template
-    matrix_rows = []
-    for emp in employees:
-        emp_skills = matrix.get(emp.pk, {})
-        cells = [emp_skills.get(skill.pk) for skill in skills]
-        matrix_rows.append({"employee": emp, "cells": cells})
-
-    from departments.models import Department
-
-    return render(request, "employees/skills_matrix.html", {
-        "skills": skills,
-        "matrix_rows": matrix_rows,
-        "departments": Department.objects.filter(is_active=True),
-        "categories": Skill.Category.choices,
-        "selected_department": department_id,
-        "selected_category": category,
-        "can_manage": request.user.can_manage_employees(),
-    })
-
-
-@employee_manager_required
-def skill_create_view(request):
-    form = SkillForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Skill created successfully.")
-        return redirect("employees:skills_matrix")
-    return render(request, "employees/skill_form.html", {"form": form, "title": "Add Skill"})
-
-
-@employee_manager_required
-def employee_skill_assign_view(request):
-    form = EmployeeSkillForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Skill assigned successfully.")
-        return redirect("employees:skills_matrix")
-    return render(request, "employees/skill_assign.html", {"form": form})
 
 
 @login_required

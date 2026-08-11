@@ -136,9 +136,6 @@
     window.Modal = Modal;
 
     function initSidebar() {
-        const navSearch = document.getElementById('navSearch');
-        const navNoResults = document.getElementById('navNoResults');
-
         // Keep the full sidebar visible — clear any leftover collapse prefs
         document.body.classList.remove('sidebar-collapsed', 'sidebar-hidden');
         try {
@@ -148,28 +145,6 @@
                 .filter((key) => key.startsWith('navGroup_'))
                 .forEach((key) => localStorage.removeItem(key));
         } catch (_) { /* ignore private-mode storage errors */ }
-
-        // Filter menu items by label (does not hide the sidebar itself)
-        navSearch?.addEventListener('input', () => {
-            const q = navSearch.value.trim().toLowerCase();
-            let visibleCount = 0;
-
-            document.querySelectorAll('.nav-group').forEach(group => {
-                let groupVisible = false;
-                group.querySelectorAll('.nav-item').forEach(item => {
-                    const label = (item.dataset.navLabel || item.textContent).toLowerCase();
-                    const match = !q || label.includes(q);
-                    item.classList.toggle('is-filtered-out', !match);
-                    if (match) {
-                        groupVisible = true;
-                        visibleCount++;
-                    }
-                });
-                group.classList.toggle('is-filtered-out', !groupVisible && !!q);
-            });
-
-            navNoResults?.classList.toggle('hidden', visibleCount > 0 || !q);
-        });
     }
 
     function initNavigation() {

@@ -12,6 +12,7 @@ urlpatterns = [
     path("timesheet/", views.timesheet_view, name="timesheet"),
     path("leave/", views.leave_list_view, name="leave_list"),
     path("leave/request/", views.leave_request_view, name="leave_request"),
+    path("api/leave-balances/<int:employee_id>/", views.leave_balances_api, name="leave_balances_api"),
     path("leave/<int:pk>/review/", views.leave_review_view, name="leave_review"),
     path("report/", views.attendance_report_view, name="report"),
 ]

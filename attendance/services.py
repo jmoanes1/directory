@@ -28,6 +28,17 @@ def employee_has_active_leave(employee, for_date=None):
     ).exists()
 
 
+def count_employees_on_leave(for_date=None):
+    """Distinct active employees on approved leave for a given date."""
+    for_date = for_date or date.today()
+    return Employee.objects.filter(
+        is_active=True,
+        leave_requests__status=LeaveRequest.Status.APPROVED,
+        leave_requests__start_date__lte=for_date,
+        leave_requests__end_date__gte=for_date,
+    ).distinct().count()
+
+
 def sync_employee_leave_status(employee, for_date=None):
     """
     Keep employment/availability status in sync with approved leave dates.
@@ -170,6 +181,21 @@ def get_leave_balances(employee, year=None):
         })
 
     return balances
+
+
+def serialize_leave_balances(balances):
+    """Serialize balance rows for JSON/API and client-side leave count hints."""
+    return [
+        {
+            "leave_type_id": row["leave_type"].pk,
+            "name": row["leave_type"].name,
+            "color": row["leave_type"].color,
+            "entitled": row["entitled"],
+            "used": row["used"],
+            "remaining": row["remaining"],
+        }
+        for row in balances
+    ]
 
 
 def _resolve_leave_recipient_email(leave):
