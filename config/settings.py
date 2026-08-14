@@ -5,6 +5,7 @@ Django settings for Employee Directory project.
 import os
 from datetime import timedelta
 from pathlib import Path
+from urllib.parse import urlparse
 
 import dj_database_url
 from dotenv import load_dotenv
@@ -103,20 +104,36 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Database — prefer Render/Heroku DATABASE_URL; else env PostgreSQL; else SQLite.
-# Render injects DATABASE_URL automatically when a Postgres service is linked.
+# Database
+# Local: SQLite. Render: set DATABASE_URL to the Internal Database URL of a
+# linked Postgres instance (Dashboard → Environment). Login queries this DB.
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").lower()
 
 if DATABASE_URL:
-    # ssl_require=True is needed for Render Postgres over the public network.
+    parsed_db = urlparse(DATABASE_URL)
+    db_host = (parsed_db.hostname or "").lower()
+    db_port = parsed_db.port
+    # External Render hosts need TLS. Internal hosts (dpg-xxxxx-a) often do not;
+    # forcing SSL there causes OperationalError on login.
+    ssl_require = db_host.endswith(".render.com") or db_host.endswith(".amazonaws.com")
+    if os.getenv("DATABASE_SSL_REQUIRE", "").lower() in ("true", "1", "yes"):
+        ssl_require = True
+    # PgBouncer (Render pooled URL, port 6543) cannot reuse connections.
+    conn_max_age = 0 if db_port == 6543 else 600
+
     DATABASES = {
-        "default": dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=True,
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=conn_max_age,
+            conn_health_checks=True,
+            ssl_require=ssl_require,
         )
     }
+    DATABASES["default"].setdefault("OPTIONS", {})
+    DATABASES["default"]["OPTIONS"].setdefault("connect_timeout", 10)
+    if db_port == 6543:
+        DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 elif DB_ENGINE == "postgresql":
     DATABASES = {
         "default": {
@@ -132,10 +149,21 @@ elif DB_ENGINE == "postgresql":
         }
     }
 else:
+    # No DATABASE_URL: SQLite. On Render this disk is ephemeral and multi-worker
+    # gunicorn will raise OperationalError ("database is locked") on login.
+    if not DEBUG:
+        print(
+            "WARNING: DATABASE_URL is not set. Using SQLite. On Render, create "
+            "PostgreSQL, copy Internal Database URL, and set DATABASE_URL. "
+            "Otherwise login can fail and data is lost on every deploy."
+        )
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
+            "OPTIONS": {
+                "timeout": 20,
+            },
         }
     }
 

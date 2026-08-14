@@ -12,7 +12,7 @@ services:
     runtime: python
     plan: free
     buildCommand: bash build.sh
-    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    startCommand: bash start.sh
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.11
@@ -25,9 +25,14 @@ services:
         value: "directory-d5w5.onrender.com,.onrender.com"
       - key: CSRF_TRUSTED_ORIGINS
         value: "https://directory-d5w5.onrender.com"
-      # Link your Render Postgres in the dashboard, or paste DATABASE_URL here
+      # Required for login. In the dashboard: create PostgreSQL → copy
+      # Internal Database URL → Environment → DATABASE_URL. Or link the DB
+      # so Render injects this automatically.
       - key: DATABASE_URL
         sync: false
+      # Creates admin / Admin@12345 on first boot when that user is missing.
+      - key: AUTO_SEED
+        value: "True"
       - key: EMAIL_BACKEND
         value: config.email_backends.ResilientEmailBackend
       - key: EMAIL_HOST
