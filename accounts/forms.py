@@ -91,6 +91,16 @@ class LoginForm(StyledFormMixin, AuthenticationForm):
             self.cleaned_data["username"] = resolve_login_username(identifier)
         return super().clean()
 
+    def get_invalid_login_error(self):
+        # Render starts with an empty database; local accounts are not copied.
+        if not User.objects.exists():
+            return forms.ValidationError(
+                "No accounts exist on this server yet. "
+                "Sign in as admin / Admin@12345 after the latest deploy finishes starting.",
+                code="invalid_login",
+            )
+        return super().get_invalid_login_error()
+
 
 class UserRegistrationForm(StyledFormMixin, UserCreationForm):
     pass

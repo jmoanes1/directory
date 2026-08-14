@@ -17,28 +17,37 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if User.objects.filter(username="admin").exists():
-            self.stdout.write(self.style.WARNING("Admin user already exists. Skipping seed."))
+            admin = User.objects.get(username="admin")
+            self.stdout.write(self.style.WARNING("Admin user already exists."))
+        else:
+            admin = User.objects.create_superuser(
+                username="admin",
+                email="admin@company.com",
+                password="Admin@12345",
+                first_name="Super",
+                last_name="Admin",
+                role=User.Role.SUPER_ADMIN,
+                is_registration_approved=True,
+            )
+            self.stdout.write("  Admin: admin / Admin@12345")
+
+        if User.objects.filter(username="hr_manager").exists():
+            self.stdout.write(self.style.WARNING("HR manager already exists."))
+        else:
+            User.objects.create_user(
+                username="hr_manager",
+                email="hr@company.com",
+                password="Hr@12345",
+                first_name="Jane",
+                last_name="HR",
+                role=User.Role.HR_MANAGER,
+                is_registration_approved=True,
+            )
+            self.stdout.write("  HR Manager: hr_manager / Hr@12345")
+
+        if Department.objects.exists():
+            self.stdout.write(self.style.WARNING("Sample departments already exist. Skipping org seed."))
             return
-
-        admin = User.objects.create_superuser(
-            username="admin",
-            email="admin@company.com",
-            password="Admin@12345",
-            first_name="Super",
-            last_name="Admin",
-            role=User.Role.SUPER_ADMIN,
-            is_registration_approved=True,
-        )
-
-        hr = User.objects.create_user(
-            username="hr_manager",
-            email="hr@company.com",
-            password="Hr@12345",
-            first_name="Jane",
-            last_name="HR",
-            role=User.Role.HR_MANAGER,
-            is_registration_approved=True,
-        )
 
         # Departments
         engineering = Department.objects.create(name="Engineering", description="Software development team")

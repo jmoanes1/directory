@@ -23,9 +23,10 @@ class EmailOrUsernameBackend(ModelBackend):
         if not resolved_username:
             return None
 
-        try:
-            user = User._default_manager.get_by_natural_key(resolved_username)
-        except User.DoesNotExist:
+        # Case-insensitive: get_by_natural_key is exact-match and rejects "Admin".
+        user = User.objects.filter(username__iexact=resolved_username).first()
+        if user is None:
+            User().set_password(password)
             return None
 
         if user.check_password(password) and self.user_can_authenticate(user):

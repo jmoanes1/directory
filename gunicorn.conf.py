@@ -29,10 +29,11 @@ def on_starting(server):
     django.setup()
     server.log.info("Applying database migrations...")
     call_command("migrate", interactive=False)
-    auto_seed = os.environ.get("AUTO_SEED", "").lower() in ("true", "1", "yes")
-    if auto_seed:
-        server.log.info("Seeding default admin / sample data (AUTO_SEED=true)...")
-        call_command("seed_data")
+    server.log.info("Ensuring admin login account exists...")
+    call_command("ensure_admin")
+    # Idempotent: fills a fresh Render DB with the README demo accounts.
+    server.log.info("Seeding sample data if the database is empty...")
+    call_command("seed_data")
     # Close connections opened in the master so forked workers do not inherit
     # a stale socket (that shows up as OperationalError on login).
     from django.db import connections
